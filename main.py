@@ -17,7 +17,12 @@ class Menu(QMainWindow):
         self.setGeometry(300, 100, 1300, 900)
         self.setWindowIcon(QIcon('data/Pictures/171.png'))
         self.setWindowTitle('Tower Defence')
-        
+        self.palette = QPalette()
+        self.im = QImage('data/grass.svg')
+        self.im = self.im.scaledToWidth(self.width())
+        self.im = self.im.scaledToHeight(self.height())
+        self.palette.setBrush(QPalette.Background, QBrush(self.im))
+        self.setPalette(self.palette)
 
 
 if __name__ == '__main__':
