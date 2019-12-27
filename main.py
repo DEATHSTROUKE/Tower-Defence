@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtWidgets import QFormLayout, QListWidget, QListWidgetItem, QDialog
 from PyQt5 import uic
 from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
+import pygame as pg
 
 
 class Menu(QMainWindow):
@@ -17,6 +18,17 @@ class Menu(QMainWindow):
         self.setGeometry(300, 100, 1300, 900)
         self.setWindowIcon(QIcon('data/Pictures/171.png'))
         self.setWindowTitle('Tower Defence')
+        self.update_bg()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F11:
+            n.showFullScreen()
+            self.update_bg()
+        elif event.key() == Qt.Key_Escape:
+            n.showMaximized()
+            self.update_bg()
+
+    def update_bg(self):
         self.palette = QPalette()
         self.im = QImage('data/grass.svg')
         self.im = self.im.scaledToWidth(self.width())
@@ -28,5 +40,6 @@ class Menu(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     n = Menu()
-    n.show()
+    n.showMaximized()
+    n.update_bg()
     sys.exit(app.exec_())
