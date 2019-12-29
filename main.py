@@ -24,6 +24,7 @@ class Menu(QMainWindow):
         super().__init__()
         uic.loadUi('menu.ui', self)
         self.setGeometry(300, 100, 1300, 900)
+        self.setFixedSize(1300, 900)
         self.setWindowIcon(QIcon('data/Pictures/171.png'))
         self.setWindowTitle('Tower Defence')
         self.update_bg()
@@ -43,6 +44,8 @@ class Menu(QMainWindow):
         self.im = self.im.scaledToHeight(self.height())
         self.palette.setBrush(QPalette.Background, QBrush(self.im))
         self.setPalette(self.palette)
+        self.play.move(self.width() // 2 - self.play.width() // 2,
+                       self.height() // 2 - self.play.height() // 2)
 
 
 class Levels(QMainWindow):
