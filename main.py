@@ -23,7 +23,7 @@ class Menu(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('menu.ui', self)
-        self.setGeometry(300, 100, 1300, 900)
+        # self.setGeometry(300, 100, 1300, 900)
         self.setFixedSize(1300, 900)
         self.setWindowIcon(QIcon('data/Pictures/171.png'))
         self.setWindowTitle('Tower Defence')
