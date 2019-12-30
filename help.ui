@@ -18,51 +18,43 @@
 	background: transparent;
 }
 QPushButton{
-	background: white;
-	font-size: 20px;
-	padding: 10px;
-	border-radius: 30px;
-	border: 2px solid black;
-}
-QPushButton:hover{
-	background: #C4C4C4;
+	background: transparent;
+	border: none;
 }</string>
   </property>
   <widget class="QPushButton" name="help">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>240</y>
-     <width>251</width>
-     <height>101</height>
+     <x>360</x>
+     <y>300</y>
+     <width>171</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="font">
-    <font>
-     <pointsize>-1</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>data/help.png</normaloff>data/help.png</iconset>
+     <normaloff>data/help2.png</normaloff>data/help2.png</iconset>
    </property>
    <property name="iconSize">
     <size>
-     <width>70</width>
-     <height>70</height>
+     <width>130</width>
+     <height>130</height>
     </size>
    </property>
   </widget>
   <widget class="QPushButton" name="play">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>60</y>
-     <width>251</width>
-     <height>151</height>
+     <x>420</x>
+     <y>30</y>
+     <width>291</width>
+     <height>181</height>
     </rect>
    </property>
    <property name="text">
@@ -70,40 +62,38 @@ QPushButton:hover{
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>data/play.png</normaloff>data/play.png</iconset>
+     <normaloff>data/play1.png</normaloff>data/play1.png</iconset>
    </property>
    <property name="iconSize">
     <size>
-     <width>100</width>
-     <height>100</height>
+     <width>260</width>
+     <height>260</height>
     </size>
    </property>
   </widget>
   <widget class="QPushButton" name="settings">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>360</y>
-     <width>251</width>
-     <height>101</height>
+     <x>590</x>
+     <y>300</y>
+     <width>151</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="font">
-    <font>
-     <pointsize>-1</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>data/set2.svg</normaloff>data/set2.svg</iconset>
+     <normaloff>data/set1.png</normaloff>data/set1.png</iconset>
    </property>
    <property name="iconSize">
     <size>
-     <width>70</width>
-     <height>70</height>
+     <width>130</width>
+     <height>130</height>
     </size>
    </property>
   </widget>
@@ -111,7 +101,7 @@ QPushButton:hover{
    <property name="geometry">
     <rect>
      <x>850</x>
-     <y>270</y>
+     <y>300</y>
      <width>211</width>
      <height>231</height>
     </rect>
@@ -138,14 +128,13 @@ border: none;</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>260</y>
+     <y>290</y>
      <width>211</width>
      <height>191</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background: transparent;
-border: none;</string>
+    <string notr="true"/>
    </property>
    <property name="text">
     <string/>

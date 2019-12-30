@@ -11,48 +11,40 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>NIGER</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
 	background: transparent;
 }
 QPushButton{
-	background: white;
-	font-size: 20px;
-	padding: 10px;
-	border-radius: 30px;
-	border: 2px solid black;
-}
-QPushButton:hover{
-	background: #C4C4C4;
+	background: transparent;
+	border: none;
 }</string>
   </property>
   <widget class="QPushButton" name="home1">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>360</y>
-     <width>251</width>
+     <x>490</x>
+     <y>370</y>
+     <width>171</width>
      <height>101</height>
     </rect>
    </property>
    <property name="font">
-    <font>
-     <pointsize>-1</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>data/home.png</normaloff>data/home.png</iconset>
+     <normaloff>data/home1.png</normaloff>data/home1.png</iconset>
    </property>
    <property name="iconSize">
     <size>
-     <width>70</width>
-     <height>70</height>
+     <width>90</width>
+     <height>90</height>
     </size>
    </property>
   </widget>
@@ -60,7 +52,7 @@ QPushButton:hover{
    <property name="geometry">
     <rect>
      <x>850</x>
-     <y>270</y>
+     <y>300</y>
      <width>211</width>
      <height>231</height>
     </rect>
@@ -87,14 +79,13 @@ border: none;</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>260</y>
+     <y>290</y>
      <width>211</width>
      <height>191</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background: transparent;
-border: none;</string>
+    <string notr="true"/>
    </property>
    <property name="text">
     <string/>
