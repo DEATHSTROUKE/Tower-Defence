@@ -31,20 +31,23 @@ class Menu(QMainWindow):
 
     def start(self):
         self.scroll1.takeWidget()
-        self.newForm = Start()
+        self.newForm = Start(self)
         self.scroll1.setWidget(self.newForm)
 
-    def play1(self):
-        global win
-        self.close()
-        # win = Levels()
-        win.show()
+    def choose_lvl(self):
+        self.scroll1.takeWidget()
+        self.newForm = Level(self)
+        self.scroll1.setWidget(self.newForm)
 
-    def settings1(self):
-        pass
+    def help(self):
+        self.scroll1.takeWidget()
+        self.newForm = Start(self)
+        self.scroll1.setWidget(self.newForm)
 
-    def help1(self):
-        pass
+    def settings(self):
+        self.scroll1.takeWidget()
+        self.newForm = Start(self)
+        self.scroll1.setWidget(self.newForm)
 
     def update_bg(self):
         self.palette = QPalette()
@@ -56,11 +59,39 @@ class Menu(QMainWindow):
 
 
 class Start(QWidget):
+    def __init__(self, main):
+        super().__init__()
+        uic.loadUi('start_screen.ui', self)
+        self.play.clicked.connect(self.play1)
+        self.help.clicked.connect(self.help1)
+        self.settings.clicked.connect(self.settings1)
+
+    def play1(self):
+        pass
+
+    def settings1(self):
+        pass
+
+    def help1(self):
+        pass
+
+
+class Level(QWidget):
     def __init__(self):
         super().__init__()
         uic.loadUi('start_screen.ui', self)
 
 
+class Help(QWidget):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('start_screen.ui', self)
+
+
+class Settings(QWidget):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('start_screen.ui', self)
 
 
 if __name__ == '__main__':
