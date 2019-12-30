@@ -1,7 +1,7 @@
 from random import choice, shuffle, random
 from copy import deepcopy
 import sys
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5.QtWidgets import QLineEdit, QMainWindow, QCheckBox, QPlainTextEdit
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
@@ -27,17 +27,17 @@ class Menu(QMainWindow):
         self.setFixedSize(1300, 900)
         self.setWindowIcon(QIcon('data/Pictures/171.png'))
         self.setWindowTitle('Tower Defence')
-        self.update_bg()
+        self.update_bg('st')
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F11:
             n.showFullScreen()
-            self.update_bg()
+            self.update_bg('full')
         elif event.key() == Qt.Key_Escape:
             n.showNormal()
-            self.update_bg()
+            self.update_bg('st')
 
-    def update_bg(self):
+    def update_bg(self, size):
         self.palette = QPalette()
         self.im = QImage('data/grass.svg')
         self.im = self.im.scaledToWidth(self.width())
@@ -46,6 +46,12 @@ class Menu(QMainWindow):
         self.setPalette(self.palette)
         self.play.move(self.width() // 2 - self.play.width() // 2,
                        self.height() // 2 - self.play.height() // 2)
+        if size == 'full':
+            self.title.setIconSize(QSize(1300, 1000))
+            self.title.resize(self.title.sizeHint())
+        else:
+            self.title.setIconSize(QSize(400, 400))
+            self.title.resize(self.title.sizeHint())
 
 
 class Levels(QMainWindow):
