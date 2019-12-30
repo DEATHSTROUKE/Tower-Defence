@@ -23,11 +23,31 @@ class Menu(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('menu.ui', self)
-        # self.setGeometry(300, 100, 1300, 900)
         self.setFixedSize(1300, 900)
-        self.setWindowIcon(QIcon('data/Pictures/171.png'))
+        self.setWindowIcon(QIcon('data/Tiles/171.png'))
         self.setWindowTitle('Tower Defence')
         self.update_bg()
+        # self.play.clicked.connect(self.play1)
+        # self.help.clicked.connect(self.help1)
+        # self.settings.clicked.connect(self.settings1)
+        self.start()
+
+    def start(self):
+        self.scroll1.takeWidget()
+        self.newForm = Start()
+        self.scroll1.setWidget(self.newForm)
+
+    def play1(self):
+        global win
+        self.close()
+        # win = Levels()
+        win.show()
+
+    def settings1(self):
+        pass
+
+    def help1(self):
+        pass
 
     def update_bg(self):
         self.palette = QPalette()
@@ -38,34 +58,13 @@ class Menu(QMainWindow):
         self.setPalette(self.palette)
 
 
-class Levels(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        uic.loadUi('menu.ui', self)
-        self.setGeometry(300, 100, 1300, 900)
-        self.setWindowIcon(QIcon('data/Pictures/171.png'))
-        self.setWindowTitle('Tower Defence')
-        self.update_bg()
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_F11:
-            n.showFullScreen()
-            self.update_bg()
-        elif event.key() == Qt.Key_Escape:
-            n.showNormal()
-            self.update_bg()
-
-    def update_bg(self):
-        self.palette = QPalette()
-        self.im = QImage('data/grass.svg')
-        self.im = self.im.scaledToWidth(self.width())
-        self.im = self.im.scaledToHeight(self.height())
-        self.palette.setBrush(QPalette.Background, QBrush(self.im))
-        self.setPalette(self.palette)
+class Start(QWidget):
+    def __int__(self):
+        uic.loadUi('start_screen.ui', self)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    n = Menu()
-    n.show()
+    win = Menu()
+    win.show()
     sys.exit(app.exec_())
