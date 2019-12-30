@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>NIGER</string>
+   <string>Form</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
@@ -28,58 +28,7 @@ QPushButton:hover{
 	background: #C4C4C4;
 }</string>
   </property>
-  <widget class="QPushButton" name="help">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>240</y>
-     <width>251</width>
-     <height>101</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>-1</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>data/help.png</normaloff>data/help.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>70</width>
-     <height>70</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="play">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>60</y>
-     <width>251</width>
-     <height>151</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>data/play.png</normaloff>data/play.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>100</width>
-     <height>100</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="settings">
+  <widget class="QPushButton" name="home1">
    <property name="geometry">
     <rect>
      <x>410</x>
@@ -98,7 +47,7 @@ QPushButton:hover{
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>data/set2.svg</normaloff>data/set2.svg</iconset>
+     <normaloff>data/home.png</normaloff>data/home.png</iconset>
    </property>
    <property name="iconSize">
     <size>

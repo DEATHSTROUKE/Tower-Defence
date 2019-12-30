@@ -95,6 +95,10 @@ class Settings(QWidget):
         super().__init__()
         uic.loadUi('settings.ui', self)
         self.main = main
+        self.home1.clicked.connect(self.home)
+
+    def home(self):
+        self.main.start()
 
 
 if __name__ == '__main__':
