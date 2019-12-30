@@ -27,9 +27,6 @@ class Menu(QMainWindow):
         self.setWindowIcon(QIcon('data/Tiles/171.png'))
         self.setWindowTitle('Tower Defence')
         self.update_bg()
-        # self.play.clicked.connect(self.play1)
-        # self.help.clicked.connect(self.help1)
-        # self.settings.clicked.connect(self.settings1)
         self.start()
 
     def start(self):
@@ -59,8 +56,11 @@ class Menu(QMainWindow):
 
 
 class Start(QWidget):
-    def __int__(self):
+    def __init__(self):
+        super().__init__()
         uic.loadUi('start_screen.ui', self)
+
+
 
 
 if __name__ == '__main__':

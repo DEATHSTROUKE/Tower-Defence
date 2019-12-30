@@ -11,16 +11,21 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>NIGER</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
 	background: transparent;
 }
-QPushButton {
-	border: 2px solid black;
-	border-radius: 50px;
+QPushButton{
 	background: white;
+	font-size: 20px;
+	padding: 10px;
+	border-radius: 30px;
+	border: 2px solid black;
+}
+QPushButton:hover{
+	background: #C4C4C4;
 }</string>
   </property>
   <widget class="QPushButton" name="help">
@@ -34,7 +39,7 @@ QPushButton {
    </property>
    <property name="font">
     <font>
-     <pointsize>15</pointsize>
+     <pointsize>-1</pointsize>
     </font>
    </property>
    <property name="text">
@@ -85,7 +90,7 @@ QPushButton {
    </property>
    <property name="font">
     <font>
-     <pointsize>20</pointsize>
+     <pointsize>-1</pointsize>
     </font>
    </property>
    <property name="text">
@@ -105,7 +110,7 @@ QPushButton {
   <widget class="QPushButton" name="pushButton_6">
    <property name="geometry">
     <rect>
-     <x>830</x>
+     <x>850</x>
      <y>270</y>
      <width>211</width>
      <height>231</height>
@@ -132,7 +137,7 @@ border: none;</string>
   <widget class="QPushButton" name="pushButton_5">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>40</x>
      <y>260</y>
      <width>211</width>
      <height>191</height>
