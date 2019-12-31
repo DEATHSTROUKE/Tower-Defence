@@ -4,19 +4,11 @@ import sys
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5.QtWidgets import QLineEdit, QMainWindow, QCheckBox, QPlainTextEdit
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtWidgets import QFormLayout, QListWidget, QListWidgetItem, QDialog
 from PyQt5 import uic
 from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
-
-GRAVITY = 1
-width, height = 500, 500
-size = 500, 500
-
-
-# screen = pg.display.set_mode(size)
-# screen.fill(pg.Color('black'))
+import os
 
 
 class Menu(QMainWindow):
@@ -85,7 +77,7 @@ class Levels(QWidget):
         self.home1.clicked.connect(self.home)
         for i in range(1, 6):
             item = QListWidgetItem(self.lw)
-            lvl = Level(self.main, f'{i} level', str(1))
+            lvl = Level(self.main, f'{i} level', str(1), i)
             self.lw.addItem(item)
             self.lw.setItemWidget(item, lvl)
             item.setSizeHint(lvl.size())
@@ -95,16 +87,19 @@ class Levels(QWidget):
 
 
 class Level(QWidget):
-    def __init__(self, main, title, diff):
+    def __init__(self, main, title, diff, number):
         super().__init__()
         uic.loadUi('lvl.ui', self)
         self.main = main
+        self.number = number
         # self.title.setText(title)
         self.diff.setText(self.diff.text() + diff)
         self.start.clicked.connect(self.start_game)
 
     def start_game(self):
-        print('Game have been started')
+        print(f'Game have been started. Level {self.number}')
+        start_level(self.number)
+        self.main.close()
 
 
 class Help(QWidget):
@@ -139,8 +134,52 @@ class Settings(QWidget):
             self.sound.setIcon(QIcon('data/sound.png'))
 
 
-if __name__ == '__main__':
+# Pygame
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    image = pg.image.load(fullname).convert()
+    if colorkey is not None:
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
+def start_level(level):
+    LEVEL = level
+    main()
+
+
+def main():
+    pg.init()
+    size = width, height = 768, 432
+
+    width, height = 500, 500
+    size = 500, 500
+
+    screen = pg.display.set_mode(size)
+    screen.fill(pg.Color('white'))
+    clock = pg.time.Clock()
+    running = False
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            # if event.type == pg.KEYDOWN:
+    pg.quit()
+    menu()
+
+
+def menu():
     app = QApplication(sys.argv)
     win = Menu()
     win.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
+    menu()
