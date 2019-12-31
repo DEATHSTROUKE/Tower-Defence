@@ -83,16 +83,28 @@ class Levels(QWidget):
         uic.loadUi('levels.ui', self)
         self.main = main
         self.home1.clicked.connect(self.home)
+        for i in range(1, 6):
+            item = QListWidgetItem(self.lw)
+            lvl = Level(self.main, f'{i} level', str(1))
+            self.lw.addItem(item)
+            self.lw.setItemWidget(item, lvl)
+            item.setSizeHint(lvl.size())
 
     def home(self):
         self.main.start()
 
 
 class Level(QWidget):
-    def __init__(self, main):
+    def __init__(self, main, title, diff):
         super().__init__()
-        uic.loadUi('level.ui', self)
+        uic.loadUi('lvl.ui', self)
         self.main = main
+        self.title.setText(title)
+        self.diff.setText(self.diff.text() + diff)
+        self.start.clicked.connect(self.start_game)
+
+    def start_game(self):
+        print('Game have been started')
 
 
 class Help(QWidget):

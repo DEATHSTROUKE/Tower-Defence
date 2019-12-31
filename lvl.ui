@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
+    <width>971</width>
     <height>120</height>
    </rect>
   </property>
@@ -25,8 +25,8 @@ QPushButton{
   <widget class="QPushButton" name="start">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>30</y>
+     <x>820</x>
+     <y>20</y>
      <width>121</width>
      <height>81</height>
     </rect>
@@ -50,13 +50,14 @@ QPushButton{
     <rect>
      <x>30</x>
      <y>20</y>
-     <width>181</width>
+     <width>341</width>
      <height>71</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">font-weight: bold;
-font-size: 24px;</string>
+font-size: 30px;
+color: #FFE155</string>
    </property>
    <property name="text">
     <string/>
@@ -65,15 +66,27 @@ font-size: 24px;</string>
   <widget class="QLabel" name="diff">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>450</x>
      <y>20</y>
-     <width>211</width>
+     <width>331</width>
      <height>71</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>-1</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+     <underline>true</underline>
+     <strikeout>false</strikeout>
+     <kerning>true</kerning>
+    </font>
+   </property>
    <property name="styleSheet">
-    <string notr="true">font-weight: Italic;
-font-size: 16px;</string>
+    <string notr="true">font-weight: bold;
+font-size: 20px;
+color: #FFE155;
+text-shadow: 1px 1px 1px #000;</string>
    </property>
    <property name="text">
     <string>Difficulty: </string>
