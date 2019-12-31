@@ -66,6 +66,7 @@ class Start(QWidget):
         self.play.clicked.connect(self.play1)
         self.help.clicked.connect(self.help1)
         self.settings.clicked.connect(self.settings1)
+        self.play.setIcon(QIcon('data/pause.png'))
 
     def play1(self):
         self.main.choose_lvl()
@@ -99,7 +100,7 @@ class Level(QWidget):
         super().__init__()
         uic.loadUi('lvl.ui', self)
         self.main = main
-        self.title.setText(title)
+        # self.title.setText(title)
         self.diff.setText(self.diff.text() + diff)
         self.start.clicked.connect(self.start_game)
 
