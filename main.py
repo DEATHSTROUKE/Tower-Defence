@@ -36,7 +36,7 @@ class Menu(QMainWindow):
 
     def choose_lvl(self):
         self.scroll1.takeWidget()
-        self.newForm = Level(self)
+        self.newForm = Levels(self)
         self.scroll1.setWidget(self.newForm)
 
     def help(self):
@@ -77,10 +77,21 @@ class Start(QWidget):
         self.main.help()
 
 
-class Level(QWidget):
+class Levels(QWidget):
     def __init__(self, main):
         super().__init__()
         uic.loadUi('levels.ui', self)
+        self.main = main
+        self.home1.clicked.connect(self.home)
+
+    def home(self):
+        self.main.start()
+
+
+class Level(QWidget):
+    def __init__(self, main):
+        super().__init__()
+        uic.loadUi('level.ui', self)
         self.main = main
 
 
@@ -88,6 +99,11 @@ class Help(QWidget):
     def __init__(self, main):
         super().__init__()
         uic.loadUi('help.ui', self)
+        self.main = main
+        self.home1.clicked.connect(self.home)
+
+    def home(self):
+        self.main.start()
 
 
 class Settings(QWidget):

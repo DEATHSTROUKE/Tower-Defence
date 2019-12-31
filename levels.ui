@@ -20,83 +20,12 @@
 QPushButton{
 	background: transparent;
 	border: none;
+}
+QListWidget {
+	background: transparent;
+	border: none;
 }</string>
   </property>
-  <widget class="QPushButton" name="help">
-   <property name="geometry">
-    <rect>
-     <x>360</x>
-     <y>300</y>
-     <width>171</width>
-     <height>151</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font/>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>data/help2.png</normaloff>data/help2.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>130</width>
-     <height>130</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="play">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>30</y>
-     <width>291</width>
-     <height>181</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>data/play1.png</normaloff>data/play1.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>260</width>
-     <height>260</height>
-    </size>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="settings">
-   <property name="geometry">
-    <rect>
-     <x>590</x>
-     <y>300</y>
-     <width>151</width>
-     <height>151</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font/>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>data/set1.png</normaloff>data/set1.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>130</width>
-     <height>130</height>
-    </size>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_6">
    <property name="geometry">
     <rect>
@@ -148,6 +77,42 @@ border: none;</string>
      <width>500</width>
      <height>500</height>
     </size>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="home1">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>430</y>
+     <width>141</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>data/home1.png</normaloff>data/home1.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>70</width>
+     <height>70</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="listWidget">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>30</y>
+     <width>601</width>
+     <height>371</height>
+    </rect>
    </property>
   </widget>
  </widget>
