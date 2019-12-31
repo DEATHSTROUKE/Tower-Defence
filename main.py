@@ -66,7 +66,6 @@ class Start(QWidget):
         self.play.clicked.connect(self.play1)
         self.help.clicked.connect(self.help1)
         self.settings.clicked.connect(self.settings1)
-        self.play.setIcon(QIcon('data/pause.png'))
 
     def play1(self):
         self.main.choose_lvl()
@@ -124,10 +123,20 @@ class Settings(QWidget):
         super().__init__()
         uic.loadUi('settings.ui', self)
         self.main = main
+        self.is_sound = True
         self.home1.clicked.connect(self.home)
+        self.sound.clicked.connect(self.change)
 
     def home(self):
         self.main.start()
+
+    def change(self):
+        if self.is_sound:
+            self.is_sound = False
+            self.sound.setIcon(QIcon('data/nosound.png'))
+        else:
+            self.is_sound = True
+            self.sound.setIcon(QIcon('data/sound.png'))
 
 
 if __name__ == '__main__':
