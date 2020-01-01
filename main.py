@@ -156,9 +156,10 @@ def start_level(level):
 
 
 def main():
-    size = width, height = 500, 500
-
-    screen = pg.display.set_mode(size)
+    # size = width, height = 500, 500
+    # screen = pg.display.set_mode(size)
+    size = (pg.display.Info().current_w, pg.display.Info().current_h)
+    screen = pg.display.set_mode(size, pg.FULLSCREEN)
     screen.fill(pg.Color('green'))
     clock = pg.time.Clock()
     running = True
@@ -166,21 +167,29 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
-            # if event.type == pg.KEYDOWN:
+            if event.type == pg.KEYDOWN:
+                pass
+            if pg.key.get_pressed()[pg.K_ESCAPE]:
+                screen = pg.display.set_mode((1280, 720))
+            if pg.key.get_pressed()[pg.K_F11]:
+                size = (pg.display.Info().current_w, pg.display.Info().current_h)
+                screen = pg.display.set_mode(size, pg.FULLSCREEN)
+
         screen.fill(pg.Color('green'))
         pg.display.flip()
 
     pg.quit()
-    menu()
+    # menu()
 
 
 def menu():
-    win.show()
+    pass
+    # win.show()
 
 
 if __name__ == '__main__':
-    # main()
-    app = QApplication(sys.argv)
-    win = Menu()
-    menu()
-    sys.exit(app.exec_())
+    main()
+    # app = QApplication(sys.argv)
+    # win = Menu()
+    # menu()
+    # sys.exit(app.exec_())
