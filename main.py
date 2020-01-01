@@ -10,6 +10,8 @@ from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
 
+pg.init()
+
 
 class Menu(QMainWindow):
     def __init__(self):
@@ -98,8 +100,8 @@ class Level(QWidget):
 
     def start_game(self):
         print(f'Game have been started. Level {self.number}')
+        self.main.hide()
         start_level(self.number)
-        self.main.close()
 
 
 class Help(QWidget):
@@ -154,32 +156,31 @@ def start_level(level):
 
 
 def main():
-    pg.init()
-    size = width, height = 768, 432
-
-    width, height = 500, 500
-    size = 500, 500
+    size = width, height = 500, 500
 
     screen = pg.display.set_mode(size)
-    screen.fill(pg.Color('white'))
+    screen.fill(pg.Color('green'))
     clock = pg.time.Clock()
-    running = False
+    running = True
     while running:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
             # if event.type == pg.KEYDOWN:
+        screen.fill(pg.Color('green'))
+        pg.display.flip()
+
     pg.quit()
     menu()
 
 
 def menu():
-    app = QApplication(sys.argv)
-    win = Menu()
     win.show()
-    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    app = QApplication(sys.argv)
+    win = Menu()
     menu()
+    sys.exit(app.exec_())
