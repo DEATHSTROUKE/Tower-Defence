@@ -156,24 +156,32 @@ def start_level(level):
 
 
 def main():
-    # size = width, height = 500, 500
-    # screen = pg.display.set_mode(size)
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
+    print(size)
     screen = pg.display.set_mode(size, pg.FULLSCREEN)
+    fullscreen = True
     screen.fill(pg.Color('green'))
     clock = pg.time.Clock()
     running = True
     while running:
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                '''Exit to menu'''
                 running = False
             if event.type == pg.KEYDOWN:
                 pass
             if pg.key.get_pressed()[pg.K_ESCAPE]:
-                screen = pg.display.set_mode((1280, 720))
+                '''Pause'''
+                pass
             if pg.key.get_pressed()[pg.K_F11]:
-                size = (pg.display.Info().current_w, pg.display.Info().current_h)
-                screen = pg.display.set_mode(size, pg.FULLSCREEN)
+                '''Change screen size'''
+                if fullscreen:
+                    screen = pg.display.set_mode((1280, 720))
+                    fullscreen = False
+                else:
+                    size = (pg.display.Info().current_w, pg.display.Info().current_h)
+                    screen = pg.display.set_mode(size, pg.FULLSCREEN)
+                    fullscreen = True
 
         screen.fill(pg.Color('green'))
         pg.display.flip()
