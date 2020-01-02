@@ -10,8 +10,8 @@ from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
 
-pg.init()
 
+# Menu
 
 class Menu(QMainWindow):
     def __init__(self):
@@ -137,17 +137,38 @@ class Settings(QWidget):
 
 
 # Pygame
+pg.init()
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
-    image = pg.image.load(fullname).convert()
+    image = pg.image.load(fullname)
     if colorkey is not None:
+        image.convert()
         if colorkey == -1:
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey)
     else:
         image = image.convert_alpha()
     return image
+
+
+all_sprites = pg.sprite.Group()
+tiles_group = pg.sprite.Group()
+decors_group = pg.sprite.Group()
+mobs_group = pg.sprite.Group()
+turrets_group = pg.sprite.Group()
+images = {}
+for i in range(1, 10):
+    images[str(i)] = load_image(f'Tiles\{str(i)}.png')
+tile_width = tile_height = 64
+
+
+class Tile(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(tiles_group, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 def load_level(fname):
@@ -168,7 +189,10 @@ def load_level(fname):
 
 
 def generate_level(level):
-    pass
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            Tile(level[x][y], x, y)
+
 
 def start_level(level):
     LEVEL = level
@@ -178,24 +202,14 @@ def start_level(level):
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
 
-    all_sprites = pg.sprite.Group()
-    tiles_group = pg.sprite.Group()
-    decors_group = pg.sprite.Group()
-    mobs_group = pg.sprite.Group()
-    turrets_group = pg.sprite.Group()
-
     screen = pg.display.set_mode(size, pg.FULLSCREEN)
     fullscreen = True
     screen.fill(pg.Color('green'))
 
     level = load_level('map1.txt')
     print(level)
-    images = {}
-    for i in range(1, 300):
-        images[str(i)] = f'{str(i)}.png'
-    print(images)
+    generate_level(level)
 
-    tile_width = tile_height = 64
     clock = pg.time.Clock()
     running = True
     while running:
@@ -218,7 +232,6 @@ def main():
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
 
-        screen.fill(pg.Color('green'))
         pg.display.flip()
 
     pg.quit()
