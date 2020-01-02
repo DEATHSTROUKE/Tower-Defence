@@ -159,8 +159,6 @@ decors_group = pg.sprite.Group()
 mobs_group = pg.sprite.Group()
 turrets_group = pg.sprite.Group()
 images = {}
-for i in range(1, 10):
-    images[str(i)] = load_image(f'Tiles\{str(i)}.png')
 tile_width = tile_height = 64
 
 
@@ -189,9 +187,9 @@ def load_level(fname):
 
 
 def generate_level(level):
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            Tile(level[x][y], x, y)
+    for x in range(len(level)):
+        for y in range(len(level[x])):
+            Tile(level[x][y], y, x)
 
 
 def start_level(level):
@@ -201,10 +199,14 @@ def start_level(level):
 
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
-
     screen = pg.display.set_mode(size, pg.FULLSCREEN)
     fullscreen = True
     screen.fill(pg.Color('green'))
+
+    # for i in range(1, 10):
+    #     images[str(i)] = load_image(f'Tiles/{str(i)}.png')
+    images[str(1)] = load_image(f'Tiles/1.png')
+    print(images)
 
     level = load_level('map1.txt')
     print(level)
@@ -221,7 +223,8 @@ def main():
                 pass
             if pg.key.get_pressed()[pg.K_ESCAPE]:
                 '''Pause'''
-                pass
+                pg.quit()
+                sys.exit()
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
                 if fullscreen:
