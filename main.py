@@ -199,19 +199,30 @@ def start_level(level):
 
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
-    screen = pg.display.set_mode(size, pg.FULLSCREEN)
+    screen = pg.display.set_mode((1280, 720), pg.FULLSCREEN)
+    screen = pg.display.set_mode((1280, 720))
     fullscreen = True
     screen.fill(pg.Color('green'))
 
-    # for i in range(1, 10):
-    #     images[str(i)] = load_image(f'Tiles/{str(i)}.png')
-    images[str(1)] = load_image(f'Tiles/1.png')
+    for i in range(1, 300):
+        try:
+            images[str(i)] = load_image(f'Tiles/{str(i)}.png')
+        except BaseException:
+            try:
+                images[str(i)] = load_image(f'Decor/{str(i)}.png')
+            except BaseException:
+                try:
+                    images[str(i)] = load_image(f'Mobs/{str(i)}.png')
+                except BaseException:
+                    try:
+                        images[str(i)] = load_image(f'Towers/{str(i)}.png')
+                    except BaseException:
+                        pass
     print(images)
 
     level = load_level('map1.txt')
     print(level)
     generate_level(level)
-
     clock = pg.time.Clock()
     running = True
     while running:
