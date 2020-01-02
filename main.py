@@ -234,7 +234,7 @@ def main():
                     size = (pg.display.Info().current_w, pg.display.Info().current_h)
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
-
+        all_sprites.draw(screen)
         pg.display.flip()
 
     pg.quit()
