@@ -150,6 +150,23 @@ def load_image(name, colorkey=None):
     return image
 
 
+def load_level(fname):
+    fname = "data/Maps/" + fname
+    with open(fname, 'r') as mapf:
+        level_map = []
+        for i, line in enumerate(mapf):
+            if i == 0:
+                MONEY = int(line.strip())
+            elif i == 1:
+                t = line.split()
+                width, height = int(t[0]), int(t[1])
+            else:
+                level_map.append(line.split())
+    max_width = max(map(len, level_map))
+    # return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    return level_map
+
+
 def start_level(level):
     LEVEL = level
     main()
@@ -157,7 +174,13 @@ def start_level(level):
 
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
-    print(size)
+
+    level = load_level('map1.txt')
+    for i in range(len(level)):
+        for j in range(len(level[0])):
+            level[i][j] += '.png'
+    print(level)
+
     screen = pg.display.set_mode(size, pg.FULLSCREEN)
     fullscreen = True
     screen.fill(pg.Color('green'))
