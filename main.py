@@ -167,6 +167,9 @@ def load_level(fname):
     return level_map
 
 
+def generate_level(level):
+    pass
+
 def start_level(level):
     LEVEL = level
     main()
@@ -175,15 +178,24 @@ def start_level(level):
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
 
-    level = load_level('map1.txt')
-    for i in range(len(level)):
-        for j in range(len(level[0])):
-            level[i][j] += '.png'
-    print(level)
+    all_sprites = pg.sprite.Group()
+    tiles_group = pg.sprite.Group()
+    decors_group = pg.sprite.Group()
+    mobs_group = pg.sprite.Group()
+    turrets_group = pg.sprite.Group()
 
     screen = pg.display.set_mode(size, pg.FULLSCREEN)
     fullscreen = True
     screen.fill(pg.Color('green'))
+
+    level = load_level('map1.txt')
+    print(level)
+    images = {}
+    for i in range(1, 300):
+        images[str(i)] = f'{str(i)}.png'
+    print(images)
+
+    tile_width = tile_height = 64
     clock = pg.time.Clock()
     running = True
     while running:
