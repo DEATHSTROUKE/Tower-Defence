@@ -220,7 +220,7 @@ def main():
                         pass
     print(images)
 
-    level = load_level('map1.txt')
+    level = load_level('map2.txt')
     print(level)
     generate_level(level)
     clock = pg.time.Clock()
