@@ -171,6 +171,13 @@ class Tile(pg.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
+class Decor(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(decors_group, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+
+
 class Turret(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(turrets_group, all_sprites)
@@ -199,7 +206,6 @@ def load_level(fname):
             else:
                 level_map.append(line.split())
     max_width = max(map(len, level_map))
-    # return list(map(lambda x: x.ljust(max_width, '.'), level_map))
     return level_map
 
 
@@ -253,7 +259,7 @@ def main():
                         images[str(i)] = load_image(f'Towers/{str(i)}.png')
                     except BaseException:
                         pass
-    level = load_level('map2.txt')
+    level = load_level('map1.txt')
     generate_level(level)
     other_obj(screen)
     pause_obj()
@@ -266,14 +272,19 @@ def main():
                 '''Exit to menu'''
                 running = False
 
-            if event.type == pg.KEYDOWN:
-                pass
-
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
-                    while True:
+                    '''Pause'''
+                    flag = True
+                    while flag:
                         pause_group.draw(screen)
                         pg.display.flip()
+                        for event in pg.event.get():
+                            if pg.key.get_pressed()[pg.K_ESCAPE]:
+                                flag = False
+                                print('yes')
+                                break
+                    print(1)
 
             if pg.key.get_pressed()[pg.K_ESCAPE]:
                 '''Pause'''
