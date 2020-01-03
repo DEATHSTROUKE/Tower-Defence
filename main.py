@@ -158,6 +158,7 @@ tiles_group = pg.sprite.Group()
 decors_group = pg.sprite.Group()
 mobs_group = pg.sprite.Group()
 turrets_group = pg.sprite.Group()
+obj_group = pg.sprite.Group()
 images = {}
 tile_width = tile_height = 64
 
@@ -165,6 +166,20 @@ tile_width = tile_height = 64
 class Tile(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+
+
+class Turret(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(turrets_group, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+
+
+class Mob(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
@@ -192,6 +207,15 @@ def generate_level(level):
             Tile(level[x][y], y, x)
 
 
+def other_obj(screen):
+    pause = pg.sprite.Sprite()
+    pause.image = load_image('pause.png')
+    pause.rect = pause.image.get_rect()
+    obj_group.add(pause)
+    pause.rect.x = 1280 - 70
+    pause.rect.y = 20
+
+
 def start_level(level):
     LEVEL = level
     main()
@@ -203,6 +227,7 @@ def main():
     fullscreen = True
     screen.fill(pg.Color('green'))
 
+    # make dict of tiles and other objects
     for i in range(1, 300):
         try:
             images[str(i)] = load_image(f'Tiles/{str(i)}.png')
@@ -217,9 +242,9 @@ def main():
                         images[str(i)] = load_image(f'Towers/{str(i)}.png')
                     except BaseException:
                         pass
-
     level = load_level('map2.txt')
     generate_level(level)
+    other_obj(screen)
     pg.display.flip()
     clock = pg.time.Clock()
     running = True
@@ -228,12 +253,21 @@ def main():
             if event.type == pg.QUIT:
                 '''Exit to menu'''
                 running = False
+
             if event.type == pg.KEYDOWN:
                 pass
+
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1 and 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
+
+                    while True:
+                        pass
+
             if pg.key.get_pressed()[pg.K_ESCAPE]:
                 '''Pause'''
                 pg.quit()
                 sys.exit()
+
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
                 if fullscreen:
@@ -243,7 +277,9 @@ def main():
                     size = (pg.display.Info().current_w, pg.display.Info().current_h)
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
+
         tiles_group.draw(screen)
+        obj_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
