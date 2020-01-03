@@ -199,7 +199,6 @@ def start_level(level):
 
 def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
-    screen = pg.display.set_mode((1280, 720), pg.FULLSCREEN)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = True
     screen.fill(pg.Color('green'))
@@ -218,11 +217,10 @@ def main():
                         images[str(i)] = load_image(f'Towers/{str(i)}.png')
                     except BaseException:
                         pass
-    print(images)
 
     level = load_level('map2.txt')
-    print(level)
     generate_level(level)
+    pg.display.flip()
     clock = pg.time.Clock()
     running = True
     while running:
@@ -245,7 +243,7 @@ def main():
                     size = (pg.display.Info().current_w, pg.display.Info().current_h)
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
-        all_sprites.draw(screen)
+        tiles_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
