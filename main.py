@@ -186,6 +186,7 @@ class Mob(pg.sprite.Sprite):
 
 
 def load_level(fname):
+    global MONEY
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
