@@ -159,6 +159,7 @@ decors_group = pg.sprite.Group()
 mobs_group = pg.sprite.Group()
 turrets_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
+pause_group = pg.sprite.Group()
 images = {}
 tile_width = tile_height = 64
 
@@ -216,6 +217,15 @@ def other_obj(screen):
     pause.rect.y = 20
 
 
+def pause_obj():
+    pause = pg.sprite.Sprite()
+    pause.image = load_image('paused.png')
+    pause.rect = pause.image.get_rect()
+    pause_group.add(pause)
+    pause.rect.x = 390
+    pause.rect.y = 200
+
+
 def start_level(level):
     LEVEL = level
     main()
@@ -245,6 +255,7 @@ def main():
     level = load_level('map2.txt')
     generate_level(level)
     other_obj(screen)
+    pause_obj()
     pg.display.flip()
     clock = pg.time.Clock()
     running = True
@@ -259,9 +270,9 @@ def main():
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
-
                     while True:
-                        pass
+                        pause_group.draw(screen)
+                        pg.display.flip()
 
             if pg.key.get_pressed()[pg.K_ESCAPE]:
                 '''Pause'''
