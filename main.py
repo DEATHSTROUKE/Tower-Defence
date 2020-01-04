@@ -203,7 +203,7 @@ class Mob(pg.sprite.Sprite):
 
 
 def load_level(fname):
-    '''Load level from file'''
+    """Loads level from file"""
     global MONEY, LIVES
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
@@ -229,22 +229,22 @@ def load_level(fname):
 
 
 def generate_level(level):
-    '''Make level'''
+    """Makes level"""
     for x in range(len(level)):
         for y in range(len(level[x])):
             Tile(level[x][y], y, x)
 
 
 def generate_decor(level):
-    '''Make decorations on level'''
+    """Make decorations on level"""
     for x in range(len(level)):
         for y in range(len(level[x])):
             if level[x][y] != '0':
                 Decor(level[x][y], y, x)
 
 
-def other_obj(screen):
-    '''Make other sprites on level such as: pause or score'''
+def other_obj():
+    """Makes other sprites on level such as: pause or score"""
     pause = pg.sprite.Sprite()
     pause.image = load_image('pause.png')
     pause.rect = pause.image.get_rect()
@@ -254,7 +254,7 @@ def other_obj(screen):
 
 
 def pause_obj():
-    '''Make other sprites in pause menu'''
+    """Makes other sprites in pause menu"""
     pause = pg.sprite.Sprite()
     pause.image = load_image('paused.png')
     pause.rect = pause.image.get_rect()
@@ -263,13 +263,17 @@ def pause_obj():
     pause.rect.y = 200
 
 
+def towers_menu():
+    """Makes menu of towers"""
+
+
 def start_level(level):
     LEVEL = level
     main()
 
 
 def main():
-    '''Main game function'''
+    """Main game function"""
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = False
@@ -293,7 +297,7 @@ def main():
     level, decor_map = load_level('map1.txt')
     generate_level(level)
     generate_decor(decor_map)
-    other_obj(screen)
+    other_obj()
     pause_obj()
     pg.display.flip()
     clock = pg.time.Clock()
@@ -343,7 +347,7 @@ def main():
 
 
 def menu():
-    '''Shows menu'''
+    """Shows menu"""
     # win.show()
 
 
