@@ -166,6 +166,7 @@ turrets_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
+tower_menu_group = pg.sprite.Group()
 wigth, height = 20, 12
 
 images = {}
@@ -200,6 +201,14 @@ class Mob(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+class TowerMenu(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y, angle):
+        super().__init__(tower_menu_group, all_sprites)
+        self.image = images[tile_type]
+        self.image = pg.transform.rotate(self.image, angle)
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
@@ -266,6 +275,10 @@ def pause_obj():
 
 def towers_menu():
     """Makes menu of towers"""
+    TowerMenu('300', 12, 10, 270)
+    TowerMenu('117', 14, 10, 0)
+    TowerMenu('120', 16, 10, 0)
+    TowerMenu('167', 18, 10, 0)
 
 
 def get_cell(mouse_pos):
@@ -291,7 +304,7 @@ def main():
     screen.fill(pg.Color('green'))
 
     # make dict of tiles and other objects
-    for i in range(1, 300):
+    for i in range(1, 303):
         try:
             images[str(i)] = load_image(f'Tiles/{str(i)}.png')
         except BaseException:
@@ -310,6 +323,7 @@ def main():
     generate_decor(decor_map)
     other_obj()
     pause_obj()
+    towers_menu()
     pg.display.flip()
     clock = pg.time.Clock()
     running = True
@@ -353,6 +367,8 @@ def main():
         obj_group.draw(screen)
         decors_group.draw(screen)
         tower_place_group.draw(screen)
+        pg.draw.rect(screen, pg.Color('#b3b3b3'), (768, 640, 512, 64)), 768, 640
+        tower_menu_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
