@@ -166,16 +166,17 @@ turrets_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
+wigth, height = 20, 12
 
 images = {}
-tile_width = tile_height = 64
+tile_size = 64
 
 
 class Tile(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
         self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
 class Decor(pg.sprite.Sprite):
@@ -185,26 +186,26 @@ class Decor(pg.sprite.Sprite):
         else:
             super().__init__(decors_group, all_sprites)
         self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
 class Turret(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(turrets_group, all_sprites)
         self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
 class Mob(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIVES
+    global MONEY, LIVES, width, heigth
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -267,6 +268,16 @@ def towers_menu():
     """Makes menu of towers"""
 
 
+def get_cell(mouse_pos):
+    print(width, height)
+    for x in range(width):
+        for y in range(height):
+            if x * tile_size <= mouse_pos[0] <= (x + 1) * tile_size and \
+                    y * tile_size <= mouse_pos[1] <= (y + 1) * tile_size:
+                return x, y
+    return None
+
+
 def start_level(level):
     LEVEL = level
     main()
@@ -325,6 +336,8 @@ def main():
                                 flag = False
                                 print('yes')
                                 break
+                else:
+                    print(get_cell(event.pos))
 
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
