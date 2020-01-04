@@ -165,6 +165,7 @@ mobs_group = pg.sprite.Group()
 turrets_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
+
 images = {}
 tile_width = tile_height = 64
 
@@ -198,10 +199,12 @@ class Mob(pg.sprite.Sprite):
 
 
 def load_level(fname):
-    global MONEY
+    '''Load level from file'''
+    global MONEY, LIVES
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
+        decor_map = []
         for i, line in enumerate(mapf):
             if i == 0:
                 MONEY = int(line.strip())
@@ -213,26 +216,30 @@ def load_level(fname):
             elif 3 < i < height + 3:
                 level_map.append(line.split())
             elif i == height + 3:
-                pass
-            elif i:
-                pass
+                h = int(line.strip())
+            elif height + 3 < i < height + h + 3:
+                decor_map.append(line.split())
+
     max_width = max(map(len, level_map))
     return level_map
 
 
 def generate_level(level):
+    '''Make level'''
     for x in range(len(level)):
         for y in range(len(level[x])):
             Tile(level[x][y], y, x)
 
 
 def generate_decor(level):
+    '''Make decorations on level'''
     for x in range(len(level)):
         for y in range(len(level[x])):
             Decor(level[x][y], y, x)
 
 
 def other_obj(screen):
+    '''Make other sprites on level such as: pause or score'''
     pause = pg.sprite.Sprite()
     pause.image = load_image('pause.png')
     pause.rect = pause.image.get_rect()
@@ -242,6 +249,7 @@ def other_obj(screen):
 
 
 def pause_obj():
+    '''Make other sprites in pause menu'''
     pause = pg.sprite.Sprite()
     pause.image = load_image('paused.png')
     pause.rect = pause.image.get_rect()
@@ -256,6 +264,7 @@ def start_level(level):
 
 
 def main():
+    '''Main game function'''
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = True
@@ -327,7 +336,7 @@ def main():
 
 
 def menu():
-    pass
+    '''Shows menu'''
     # win.show()
 
 
