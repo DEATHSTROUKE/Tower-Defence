@@ -221,7 +221,7 @@ def load_level(fname):
                 decor_map.append(line.split())
 
     max_width = max(map(len, level_map))
-    return level_map
+    return level_map, decor_map
 
 
 def generate_level(level):
@@ -235,7 +235,8 @@ def generate_decor(level):
     '''Make decorations on level'''
     for x in range(len(level)):
         for y in range(len(level[x])):
-            Decor(level[x][y], y, x)
+            if level[x][y] != '0':
+                Decor(level[x][y], y, x)
 
 
 def other_obj(screen):
@@ -285,8 +286,9 @@ def main():
                         images[str(i)] = load_image(f'Towers/{str(i)}.png')
                     except BaseException:
                         pass
-    level = load_level('map1.txt')
+    level, decor_map = load_level('map1.txt')
     generate_level(level)
+    generate_decor(decor_map)
     other_obj(screen)
     pause_obj()
     pg.display.flip()
@@ -310,12 +312,11 @@ def main():
                     while flag:
                         pause_group.draw(screen)
                         pg.display.flip()
-                        for i in pg.event.get():
+                        for ev in pg.event.get():
                             if pg.key.get_pressed()[pg.K_ESCAPE]:
                                 flag = False
                                 print('yes')
                                 break
-                    print(1)
 
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
@@ -329,6 +330,7 @@ def main():
 
         tiles_group.draw(screen)
         obj_group.draw(screen)
+        decors_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
