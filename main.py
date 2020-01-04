@@ -165,6 +165,7 @@ mobs_group = pg.sprite.Group()
 turrets_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
+tower_place_group = pg.sprite.Group()
 
 images = {}
 tile_width = tile_height = 64
@@ -179,7 +180,10 @@ class Tile(pg.sprite.Sprite):
 
 class Decor(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(decors_group, all_sprites)
+        if tile_type == '80':
+            super().__init__(tower_place_group, all_sprites)
+        else:
+            super().__init__(decors_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
@@ -268,7 +272,7 @@ def main():
     '''Main game function'''
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
-    fullscreen = True
+    fullscreen = False
     screen.fill(pg.Color('green'))
 
     # make dict of tiles and other objects
@@ -331,6 +335,7 @@ def main():
         tiles_group.draw(screen)
         obj_group.draw(screen)
         decors_group.draw(screen)
+        tower_place_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
