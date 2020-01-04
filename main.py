@@ -23,6 +23,11 @@ class Menu(QMainWindow):
         self.update_bg()
         self.start()
 
+    def keyPressEvent(self, event):
+        '''Hot keys'''
+        if event.key() == Qt.Key_Escape:
+            self.close()
+
     def start(self):
         self.scroll1.takeWidget()
         self.newForm = Start(self)
@@ -202,9 +207,11 @@ def load_level(fname):
                 MONEY = int(line.strip())
             elif i == 1:
                 t = line.split()
-                width, height = int(t[0]), int(t[1])
-            else:
+                width, height, start_x, start_y = int(t[0]), int(t[1]), int(t[2]), int(t[3])
+            elif 2 < i < height + 2:
                 level_map.append(line.split())
+            elif i == height + 2:
+                pass
     max_width = max(map(len, level_map))
     return level_map
 
@@ -220,7 +227,7 @@ def other_obj(screen):
     pause.image = load_image('pause.png')
     pause.rect = pause.image.get_rect()
     obj_group.add(pause)
-    pause.rect.x = 1280 - 70
+    pause.rect.x = 1210
     pause.rect.y = 20
 
 
@@ -272,6 +279,11 @@ def main():
                 '''Exit to menu'''
                 running = False
 
+            if pg.key.get_pressed()[pg.K_ESCAPE]:
+                '''Pause'''
+                pg.quit()
+                sys.exit()
+
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
                     '''Pause'''
@@ -279,17 +291,12 @@ def main():
                     while flag:
                         pause_group.draw(screen)
                         pg.display.flip()
-                        for event in pg.event.get():
+                        for i in pg.event.get():
                             if pg.key.get_pressed()[pg.K_ESCAPE]:
                                 flag = False
                                 print('yes')
                                 break
                     print(1)
-
-            if pg.key.get_pressed()[pg.K_ESCAPE]:
-                '''Pause'''
-                pg.quit()
-                sys.exit()
 
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
