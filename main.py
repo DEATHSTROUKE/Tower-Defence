@@ -206,11 +206,15 @@ def load_level(fname):
             if i == 0:
                 MONEY = int(line.strip())
             elif i == 1:
+                LIVES = int(line.strip())
+            elif i == 2:
                 t = line.split()
                 width, height, start_x, start_y = int(t[0]), int(t[1]), int(t[2]), int(t[3])
-            elif 2 < i < height + 2:
+            elif 3 < i < height + 3:
                 level_map.append(line.split())
-            elif i == height + 2:
+            elif i == height + 3:
+                pass
+            elif i:
                 pass
     max_width = max(map(len, level_map))
     return level_map
@@ -220,6 +224,12 @@ def generate_level(level):
     for x in range(len(level)):
         for y in range(len(level[x])):
             Tile(level[x][y], y, x)
+
+
+def generate_decor(level):
+    for x in range(len(level)):
+        for y in range(len(level[x])):
+            Decor(level[x][y], y, x)
 
 
 def other_obj(screen):
