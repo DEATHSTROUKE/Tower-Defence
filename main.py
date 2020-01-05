@@ -163,7 +163,7 @@ all_sprites = pg.sprite.Group()
 tiles_group = pg.sprite.Group()
 decors_group = pg.sprite.Group()
 mobs_group = pg.sprite.Group()
-turrets_group = pg.sprite.Group()
+towers_group = pg.sprite.Group()
 obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
@@ -195,7 +195,7 @@ class Decor(pg.sprite.Sprite):
 
 class Tower(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(turrets_group, all_sprites)
+        super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
@@ -219,6 +219,11 @@ class MashineGun(Tower):
         super().__init__('300', pos_x, pos_y)
 
 
+class SmallGun(Tower):
+    def __init__(self, pos_x, pos_y):
+        super().__init__('117', pos_x, pos_y)
+
+
 class Rocket(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('118', pos_x, pos_y)
@@ -235,11 +240,12 @@ class BigGun(Tower):
 
 
 class TowerMenu(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y, angle):
+    def __init__(self, tile_type, pos_x, pos_y, angle, tower_type):
         super().__init__(tower_menu_group, all_sprites)
         self.image = images[tile_type]
         self.image = pg.transform.rotate(self.image, angle)
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.type = tower_type
 
 
 def load_level(fname):
@@ -305,10 +311,10 @@ def pause_obj():
 
 def towers_menu():
     """Makes menu of towers"""
-    TowerMenu('300', 12, 10, 270)
-    TowerMenu('117', 13.5, 10, 0)
-    TowerMenu('120', 15, 10, 0)
-    TowerMenu('167', 16.5, 10, 0)
+    TowerMenu('300', 12, 10, 270, 1)
+    TowerMenu('117', 13.5, 10, 0, 2)
+    TowerMenu('120', 15, 10, 0, 3)
+    TowerMenu('167', 16.5, 10, 0, 4)
 
 
 def get_cell(mouse_pos):
@@ -360,6 +366,7 @@ def main():
 
     # create flags
     tower_menu_clicked = False
+    tower_type = 0
 
     clock = pg.time.Clock()
     running = True
@@ -391,14 +398,27 @@ def main():
                     for tower in tower_menu_group:
                         if tower.rect.collidepoint(x1, y1) and not tower_menu_clicked:
                             tower_menu_clicked = True
+                            tower_type = tower.type
                             break
                     else:
                         if tower_menu_clicked:
-                            for t in tower_place_group:
-                                if t.rect.collidepoint(x1, y1):
-                                    x2, y2 = get_cell(event.pos)
-                                    TowerBase('92', x2, y2)
+                            for i in towers_group:
+                                if i.rect.collidepoint(x1, y1):
                                     break
+                            else:
+                                for t in tower_place_group:
+                                    if t.rect.collidepoint(x1, y1):
+                                        x2, y2 = get_cell(event.pos)
+                                        TowerBase('92', x2, y2)
+                                        if tower_type == 1:
+                                            MashineGun(x2, y2)
+                                        elif tower_type == 2:
+                                            Rocket(x2, y2)
+                                        elif tower_type == 3:
+                                            PVO(x2, y2)
+                                        elif tower_type == 4:
+                                            BigGun(x2, y2)
+                                        break
                         tower_menu_clicked = False
 
             if event.type == pg.MOUSEBUTTONUP:
@@ -422,6 +442,7 @@ def main():
         pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 384, 64)), 768, 640
         tower_menu_group.draw(screen)
         tower_base.draw(screen)
+        towers_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
