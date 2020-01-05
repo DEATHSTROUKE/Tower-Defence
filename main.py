@@ -158,6 +158,7 @@ def load_image(name, colorkey=None):
     return image
 
 
+# groups
 all_sprites = pg.sprite.Group()
 tiles_group = pg.sprite.Group()
 decors_group = pg.sprite.Group()
@@ -167,8 +168,10 @@ obj_group = pg.sprite.Group()
 pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
 tower_menu_group = pg.sprite.Group()
-wigth, height = 20, 12
+money_group = pg.sprite.Group()
 
+
+wigth, height = 20, 12
 images = {}
 tile_size = 64
 
@@ -276,9 +279,9 @@ def pause_obj():
 def towers_menu():
     """Makes menu of towers"""
     TowerMenu('300', 12, 10, 270)
-    TowerMenu('117', 14, 10, 0)
-    TowerMenu('120', 16, 10, 0)
-    TowerMenu('167', 18, 10, 0)
+    TowerMenu('117', 13.5, 10, 0)
+    TowerMenu('120', 15, 10, 0)
+    TowerMenu('167', 16.5, 10, 0)
 
 
 def get_cell(mouse_pos):
@@ -301,7 +304,7 @@ def main():
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = False
-    screen.fill(pg.Color('green'))
+    screen.fill(pg.Color('black'))
 
     # make dict of tiles and other objects
     for i in range(1, 303):
@@ -318,6 +321,8 @@ def main():
                         images[str(i)] = load_image(f'Towers/{str(i)}.png')
                     except BaseException:
                         pass
+
+    # generate objects and groups on the main screen
     level, decor_map = load_level('map1.txt')
     generate_level(level)
     generate_decor(decor_map)
@@ -325,6 +330,10 @@ def main():
     pause_obj()
     towers_menu()
     pg.display.flip()
+
+    # create flags
+    tower_menu_clicked = False
+
     clock = pg.time.Clock()
     running = True
     while running:
@@ -350,8 +359,18 @@ def main():
                                 flag = False
                                 print('yes')
                                 break
-                else:
-                    print(get_cell(event.pos))
+                if event.button == 1:
+                    x1, y1 = event.pos
+                    for tower in tower_menu_group:
+                        if tower.rect.collidepoint(x1, y1) and not tower_menu_clicked:
+                            tower_menu_clicked = True
+                            break
+                    else:
+                        tower_menu_clicked = False
+                    # print(get_cell(event.pos))
+
+            if event.type == pg.MOUSEBUTTONUP:
+                pass
 
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
@@ -366,8 +385,9 @@ def main():
         tiles_group.draw(screen)
         obj_group.draw(screen)
         decors_group.draw(screen)
-        tower_place_group.draw(screen)
-        pg.draw.rect(screen, pg.Color('#b3b3b3'), (768, 640, 512, 64)), 768, 640
+        if tower_menu_clicked:
+            tower_place_group.draw(screen)
+        pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 384, 64)), 768, 640
         tower_menu_group.draw(screen)
         pg.display.flip()
 
