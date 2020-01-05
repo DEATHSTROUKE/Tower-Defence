@@ -313,8 +313,9 @@ def towers_menu():
     """Makes menu of towers"""
     TowerMenu('300', 12, 10, 270, 1)
     TowerMenu('117', 13.5, 10, 0, 2)
-    TowerMenu('120', 15, 10, 0, 3)
-    TowerMenu('167', 16.5, 10, 0, 4)
+    TowerMenu('118', 15, 10, 0, 3)
+    TowerMenu('120', 16.5, 10, 0, 4)
+    TowerMenu('167', 18, 10, 0, 5)
 
 
 def get_cell(mouse_pos):
@@ -413,10 +414,12 @@ def main():
                                         if tower_type == 1:
                                             MashineGun(x2, y2)
                                         elif tower_type == 2:
-                                            Rocket(x2, y2)
+                                            SmallGun(x2, y2)
                                         elif tower_type == 3:
-                                            PVO(x2, y2)
+                                            Rocket(x2, y2)
                                         elif tower_type == 4:
+                                            PVO(x2, y2)
+                                        elif tower_type == 5:
                                             BigGun(x2, y2)
                                         break
                         tower_menu_clicked = False
@@ -439,7 +442,7 @@ def main():
         decors_group.draw(screen)
         if tower_menu_clicked:
             tower_place_group.draw(screen)
-        pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 384, 64)), 768, 640
+        pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 450, 64)), 768, 640
         tower_menu_group.draw(screen)
         tower_base.draw(screen)
         towers_group.draw(screen)
