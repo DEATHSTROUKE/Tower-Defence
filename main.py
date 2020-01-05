@@ -169,7 +169,7 @@ pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
 tower_menu_group = pg.sprite.Group()
 money_group = pg.sprite.Group()
-
+tower_base = pg.sprite.Group()
 
 wigth, height = 20, 12
 images = {}
@@ -193,7 +193,7 @@ class Decor(pg.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
-class Turret(pg.sprite.Sprite):
+class Tower(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(turrets_group, all_sprites)
         self.image = images[tile_type]
@@ -205,6 +205,33 @@ class Mob(pg.sprite.Sprite):
         super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+class TowerBase(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(tower_base, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+class MashineGun(Tower):
+    def __init__(self, pos_x, pos_y):
+        super().__init__('300', pos_x, pos_y)
+
+
+class Rocket(Tower):
+    def __init__(self, pos_x, pos_y):
+        super().__init__('118', pos_x, pos_y)
+
+
+class PVO(Tower):
+    def __init__(self, pos_x, pos_y):
+        super().__init__('120', pos_x, pos_y)
+
+
+class BigGun(Tower):
+    def __init__(self, pos_x, pos_y):
+        super().__init__('167', pos_x, pos_y)
 
 
 class TowerMenu(pg.sprite.Sprite):
@@ -359,15 +386,20 @@ def main():
                                 flag = False
                                 print('yes')
                                 break
-                if event.button == 1:
+                elif event.button == 1:
                     x1, y1 = event.pos
                     for tower in tower_menu_group:
                         if tower.rect.collidepoint(x1, y1) and not tower_menu_clicked:
                             tower_menu_clicked = True
                             break
                     else:
+                        if tower_menu_clicked:
+                            for t in tower_place_group:
+                                if t.rect.collidepoint(x1, y1):
+                                    x2, y2 = get_cell(event.pos)
+                                    TowerBase('92', x2, y2)
+                                    break
                         tower_menu_clicked = False
-                    # print(get_cell(event.pos))
 
             if event.type == pg.MOUSEBUTTONUP:
                 pass
@@ -389,6 +421,7 @@ def main():
             tower_place_group.draw(screen)
         pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 384, 64)), 768, 640
         tower_menu_group.draw(screen)
+        tower_base.draw(screen)
         pg.display.flip()
 
     pg.quit()
