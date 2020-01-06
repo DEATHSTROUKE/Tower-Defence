@@ -230,16 +230,71 @@ class Money(pg.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
-class Tower(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(towers_group, all_sprites)
-        self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
-
+# Mobs
 
 class Mob(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(mobs_group, all_sprites)
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+class Ball(Mob):
+    def __init__(self, level, pos_x, pos_y, angle):
+        tile_type = ''
+        if level == 1:
+            tile_type = '193'
+        elif level == 2:
+            tile_type = '195'
+        elif level == 3:
+            tile_type = '194'
+        elif level == 4:
+            tile_type = '196'
+        super().__init__(tile_type, pos_x, pos_y)
+        self.image = pg.transform.rotate(self.image, angle)
+
+
+class Frog(Mob):
+    def __init__(self, level, pos_x, pos_y, angle):
+        tile_type = ''
+        if level == 1:
+            tile_type = '163'
+        elif level == 2:
+            tile_type = '165'
+        elif level == 3:
+            tile_type = '166'
+        elif level == 4:
+            tile_type = '164'
+        super().__init__(tile_type, pos_x, pos_y)
+        self.image = pg.transform.rotate(self.image, angle)
+
+
+class Tank(Mob):
+    def __init__(self, level, pos_x, pos_y, angle):
+        tile_type = ''
+        if level == 1:
+            tile_type = '188'
+        elif level == 2:
+            tile_type = '189'
+        super().__init__(tile_type, pos_x, pos_y)
+        self.image = pg.transform.rotate(self.image, angle)
+
+
+class Plain(Mob):
+    def __init__(self, level, pos_x, pos_y):
+        tile_type = ''
+        if level == 1:
+            tile_type = '190'
+        elif level == 2:
+            tile_type = '192'
+        super().__init__(tile_type, pos_x, pos_y)
+
+
+# Towers
+
+class Tower(pg.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
@@ -254,27 +309,34 @@ class TowerBase(pg.sprite.Sprite):
 class MashineGun(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('300', pos_x, pos_y)
+        self.level = 1
 
 
 class SmallGun(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('117', pos_x, pos_y)
+        self.level = 1
 
 
 class Rocket(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('118', pos_x, pos_y)
+        self.level = 1
 
 
 class PVO(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('120', pos_x, pos_y)
+        self.level = 1
 
 
 class BigGun(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('167', pos_x, pos_y)
+        self.level = 1
 
+
+# Tower Menu
 
 class TowerMenu(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, angle, tower_type):
