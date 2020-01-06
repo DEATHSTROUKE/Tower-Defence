@@ -170,6 +170,8 @@ tower_place_group = pg.sprite.Group()
 tower_menu_group = pg.sprite.Group()
 money_group = pg.sprite.Group()
 tower_base = pg.sprite.Group()
+upgrade_group = pg.sprite.Group()
+sell_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -283,6 +285,20 @@ class TowerMenu(pg.sprite.Sprite):
         self.type = tower_type
 
 
+class Upgrade(pg.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(upgrade_group, all_sprites)
+        self.image = load_image('upgrade.png')
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+class Sell(pg.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(tower_base, all_sprites)
+        self.image = load_image('sell.png')
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
 def load_level(fname):
     """Loads level from file"""
     global MONEY, LIVES, width, heigth, way
@@ -337,6 +353,9 @@ def other_obj():
     obj_group.add(pause)
     pause.rect.x = 1210
     pause.rect.y = 20
+    Upgrade(8, 10)
+    Sell(10.5, 10)
+
 
 
 def pause_obj():
@@ -443,7 +462,7 @@ def main():
     pause_obj()
     towers_menu()
     generate_money()
-    generate_way()
+    # generate_way()
     pg.display.flip()
 
     # create flags
@@ -522,11 +541,13 @@ def main():
         decors_group.draw(screen)
         if tower_menu_clicked:
             tower_place_group.draw(screen)
-        pg.draw.rect(screen, pg.Color('#66cdaa'), (768, 640, 450, 64)), 768, 640
+        pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 64)), 768, 640
         tower_menu_group.draw(screen)
         tower_base.draw(screen)
         towers_group.draw(screen)
         money_group.draw(screen)
+        upgrade_group.draw(screen)
+        sell_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
