@@ -385,12 +385,29 @@ def generate_money():
         x += 0.5
         Money(int(i), x, y)
 
+
 def generate_way():
-    for i in way:
-        pass
+    global way
+    full_way = []
+    full_way.append(way[0])
+    for c in range(len(way) - 1):
+        if way[c][0] == way[c + 1][0]:
+            if way[c][1] < way[c + 1][1]:
+                pass
+            else:
+                pass
+        else:
+            if way[c][0] < way[c + 1][0]:
+                pass
+            else:
+                pass
+
+    way = full_way
+    print(way)
 
 
 def start_level(level):
+    global LEVEL
     LEVEL = level
     main()
 
@@ -426,6 +443,7 @@ def main():
     pause_obj()
     towers_menu()
     generate_money()
+    generate_way()
     pg.display.flip()
 
     # create flags
