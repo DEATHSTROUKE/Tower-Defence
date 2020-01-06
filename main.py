@@ -638,6 +638,14 @@ def main():
                                 tower_menu_clicked = False
 
                         # upgrade and sell
+                        for up in upgrade_group:
+                            if up.rect.collidepoint(x1, y1):
+                                if chosen_tower:
+                                    for tow in towers_group:
+                                        if tow == chosen_tower:
+                                            tow.upgrade()
+                                            break
+                                    break
                         for tower in towers_group:
                             if tower.rect.collidepoint(x1, y1):
                                 upgrade_group.update(True)
@@ -650,15 +658,6 @@ def main():
                         else:
                             upgrade_group.update(False)
                             sell_group.update(False)
-
-                        for up in upgrade_group:
-                            if up.rect.collidepoint(x1, y1):
-                                if chosen_tower:
-                                    for tow in towers_group:
-                                        if tow == chosen_tower:
-                                            print('yeeeeeeeee')
-                                            tow.upgrade()
-                                    break
 
             if event.type == pg.MOUSEBUTTONUP:
                 pass
