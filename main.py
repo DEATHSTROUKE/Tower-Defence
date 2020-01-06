@@ -198,6 +198,35 @@ class Decor(pg.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
+class Money(pg.sprite.Sprite):
+    def __init__(self, money, pos_x, pos_y):
+        super().__init__(tiles_group, all_sprites)
+        tile_type = '197'
+        if money == 0:
+            tile_type = '197'
+        elif money == 1:
+            tile_type == '198'
+        elif money == 2:
+            tile_type == '199'
+        elif money == 3:
+            tile_type == '200'
+        elif money == 4:
+            tile_type == '201'
+        elif money == 5:
+            tile_type == '202'
+        elif money == 6:
+            tile_type == '203'
+        elif money == 7:
+            tile_type == '204'
+        elif money == 8:
+            tile_type == '205'
+        elif money == 9:
+            tile_type == '206'
+
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
 class Tower(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(towers_group, all_sprites)
@@ -344,6 +373,10 @@ def generate_money():
     money_group.add(dol)
     dol.rect.x = 10
     dol.rect.y = 10
+    print(MONEY)
+    money = str(MONEY)
+    for i in money:
+        Mo
 
 
 def start_level(level):
