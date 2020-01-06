@@ -169,7 +169,7 @@ pause_group = pg.sprite.Group()
 tower_place_group = pg.sprite.Group()
 tower_menu_group = pg.sprite.Group()
 money_group = pg.sprite.Group()
-tower_base = pg.sprite.Group()
+tower_base_group = pg.sprite.Group()
 upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
 
@@ -182,6 +182,7 @@ wigth, height = 20, 13
 images = {}
 way = []
 tile_size = 64
+chosen_tower, chosen_tower_base = None, None
 
 
 class Tile(pg.sprite.Sprite):
@@ -301,7 +302,7 @@ class Tower(pg.sprite.Sprite):
 
 class TowerBase(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tower_base, all_sprites)
+        super().__init__(tower_base_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
@@ -311,11 +312,23 @@ class MashineGun(Tower):
         super().__init__('300', pos_x, pos_y)
         self.level = 1
 
+    def upgrade(self):
+        self.level += 1
+        if self.level == 2:
+            self.image = images['301']
+        elif self.level == 3:
+            self.image = images['302']
+
 
 class SmallGun(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('117', pos_x, pos_y)
         self.level = 1
+
+    def upgrade(self):
+        self.level += 1
+        if self.level == 2:
+            self.image = images['142']
 
 
 class Rocket(Tower):
@@ -323,17 +336,30 @@ class Rocket(Tower):
         super().__init__('118', pos_x, pos_y)
         self.level = 1
 
+    def upgrade(self):
+        pass
+
 
 class PVO(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('120', pos_x, pos_y)
         self.level = 1
 
+    def upgrade(self):
+        self.level += 1
+        if self.level == 2:
+            self.image = images['119']
+
 
 class BigGun(Tower):
     def __init__(self, pos_x, pos_y):
         super().__init__('167', pos_x, pos_y)
         self.level = 1
+
+    def upgrade(self):
+        self.level += 1
+        if self.level == 2:
+            self.image = images['168']
 
 
 # Tower Menu
@@ -355,11 +381,13 @@ class Upgrade(pg.sprite.Sprite):
         self.activ = False
 
     def update(self, *args):
+        global chosen_tower, chosen_tower_base
         self.activ = args[0]
         if self.activ:
             self.image = load_image('upgrade_clicked.png')
         else:
             self.image = load_image('upgrade.png')
+            chosen_tower, chosen_tower_base = None, None
 
 
 class Sell(pg.sprite.Sprite):
@@ -514,6 +542,7 @@ def start_level(level):
 
 def main():
     """Main game function"""
+    global chosen_tower, chosen_tower_base
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = False
@@ -613,10 +642,23 @@ def main():
                             if tower.rect.collidepoint(x1, y1):
                                 upgrade_group.update(True)
                                 sell_group.update(True)
+                                chosen_tower = tower
+                                for tb in tower_base_group:
+                                    if tb.rect.collidepoint(x1, y1):
+                                        chosen_tower_base = tb
                                 break
                         else:
                             upgrade_group.update(False)
                             sell_group.update(False)
+
+                        for up in upgrade_group:
+                            if up.rect.collidepoint(x1, y1):
+                                if chosen_tower:
+                                    for tow in towers_group:
+                                        if tow == chosen_tower:
+                                            print('yeeeeeeeee')
+                                            tow.upgrade()
+                                    break
 
             if event.type == pg.MOUSEBUTTONUP:
                 pass
@@ -638,7 +680,7 @@ def main():
             tower_place_group.draw(screen)
         pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 64)), 768, 640
         tower_menu_group.draw(screen)
-        tower_base.draw(screen)
+        tower_base_group.draw(screen)
         towers_group.draw(screen)
         money_group.draw(screen)
         upgrade_group.draw(screen)
