@@ -205,23 +205,23 @@ class Money(pg.sprite.Sprite):
         if money == 0:
             tile_type = '197'
         elif money == 1:
-            tile_type == '198'
+            tile_type = '198'
         elif money == 2:
-            tile_type == '199'
+            tile_type = '199'
         elif money == 3:
-            tile_type == '200'
+            tile_type = '200'
         elif money == 4:
-            tile_type == '201'
+            tile_type = '201'
         elif money == 5:
-            tile_type == '202'
+            tile_type = '202'
         elif money == 6:
-            tile_type == '203'
+            tile_type = '203'
         elif money == 7:
-            tile_type == '204'
+            tile_type = '204'
         elif money == 8:
-            tile_type == '205'
+            tile_type = '205'
         elif money == 9:
-            tile_type == '206'
+            tile_type = '206'
 
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
@@ -371,12 +371,15 @@ def generate_money():
     dol.image = images['209']
     dol.rect = dol.image.get_rect()
     money_group.add(dol)
-    dol.rect.x = 10
-    dol.rect.y = 10
+    dol.rect.x = 0
+    dol.rect.y = 0
     print(MONEY)
+    x, y = 0, 0
     money = str(MONEY)
     for i in money:
-        Mo
+        x += 0.5
+        print(i)
+        Money(int(i), x, y)
 
 
 def start_level(level):
