@@ -641,10 +641,7 @@ def main():
                         for up in upgrade_group:
                             if up.rect.collidepoint(x1, y1):
                                 if chosen_tower:
-                                    for tow in towers_group:
-                                        if tow == chosen_tower:
-                                            tow.upgrade()
-                                            break
+                                    chosen_tower.upgrade()
                                     break
                         for tower in towers_group:
                             if tower.rect.collidepoint(x1, y1):
@@ -656,8 +653,12 @@ def main():
                                         chosen_tower_base = tb
                                 break
                         else:
-                            upgrade_group.update(False)
-                            sell_group.update(False)
+                            for up in upgrade_group:
+                                if up.rect.collidepoint(x1, y1):
+                                    break
+                            else:
+                                upgrade_group.update(False)
+                                sell_group.update(False)
 
             if event.type == pg.MOUSEBUTTONUP:
                 pass
