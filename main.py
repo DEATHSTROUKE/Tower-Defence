@@ -171,6 +171,11 @@ tower_menu_group = pg.sprite.Group()
 money_group = pg.sprite.Group()
 tower_base = pg.sprite.Group()
 
+# constant
+MONEY = 0
+LIVES = 0
+LEVEL = 0
+
 wigth, height = 20, 12
 images = {}
 tile_size = 64
@@ -319,6 +324,7 @@ def towers_menu():
 
 
 def get_cell(mouse_pos):
+    """Get coords of cell"""
     print(width, height)
     for x in range(width):
         for y in range(height):
@@ -326,6 +332,18 @@ def get_cell(mouse_pos):
                     y * tile_size <= mouse_pos[1] <= (y + 1) * tile_size:
                 return x, y
     return None
+
+
+def generate_money():
+    """Make start money"""
+    global money_group
+    money_group = pg.sprite.Group()
+    dol = pg.sprite.Sprite()
+    dol.image = images['209']
+    dol.rect = dol.image.get_rect()
+    money_group.add(dol)
+    dol.rect.x = 10
+    dol.rect.y = 10
 
 
 def start_level(level):
@@ -363,6 +381,7 @@ def main():
     other_obj()
     pause_obj()
     towers_menu()
+    generate_money()
     pg.display.flip()
 
     # create flags
@@ -392,7 +411,6 @@ def main():
                         for ev in pg.event.get():
                             if pg.key.get_pressed()[pg.K_ESCAPE]:
                                 flag = False
-                                print('yes')
                                 break
                 elif event.button == 1:
                     x1, y1 = event.pos
@@ -446,6 +464,7 @@ def main():
         tower_menu_group.draw(screen)
         tower_base.draw(screen)
         towers_group.draw(screen)
+        money_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
