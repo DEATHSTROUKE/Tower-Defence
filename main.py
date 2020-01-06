@@ -290,13 +290,29 @@ class Upgrade(pg.sprite.Sprite):
         super().__init__(upgrade_group, all_sprites)
         self.image = load_image('upgrade.png')
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.activ = False
+
+    def update(self, *args):
+        self.activ = args[0]
+        if self.activ:
+            self.image = load_image('upgrade_clicked.png')
+        else:
+            self.image = load_image('upgrade.png')
 
 
 class Sell(pg.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(tower_base, all_sprites)
+        super().__init__(sell_group, all_sprites)
         self.image = load_image('sell.png')
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.activ = False
+
+    def update(self, *args):
+        self.activ = args[0]
+        if self.activ:
+            self.image = load_image('sell_clicked.png')
+        else:
+            self.image = load_image('sell.png')
 
 
 def load_level(fname):
@@ -355,7 +371,6 @@ def other_obj():
     pause.rect.y = 20
     Upgrade(8, 10)
     Sell(10.5, 10)
-
 
 
 def pause_obj():
@@ -483,45 +498,59 @@ def main():
                 sys.exit()
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1 and 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
-                    '''Pause'''
-                    flag = True
-                    while flag:
-                        pause_group.draw(screen)
-                        pg.display.flip()
-                        for ev in pg.event.get():
-                            if pg.key.get_pressed()[pg.K_ESCAPE]:
-                                flag = False
-                                break
-                elif event.button == 1:
-                    x1, y1 = event.pos
-                    for tower in tower_menu_group:
-                        if tower.rect.collidepoint(x1, y1) and not tower_menu_clicked:
-                            tower_menu_clicked = True
-                            tower_type = tower.type
-                            break
-                    else:
-                        if tower_menu_clicked:
-                            for i in towers_group:
-                                if i.rect.collidepoint(x1, y1):
+                if event.button == 1:
+                    if 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
+                        # Pause
+                        flag = True
+                        while flag:
+                            pause_group.draw(screen)
+                            pg.display.flip()
+                            for ev in pg.event.get():
+                                if pg.key.get_pressed()[pg.K_ESCAPE]:
+                                    flag = False
                                     break
-                            else:
-                                for t in tower_place_group:
-                                    if t.rect.collidepoint(x1, y1):
-                                        x2, y2 = get_cell(event.pos)
-                                        TowerBase('92', x2, y2)
-                                        if tower_type == 1:
-                                            MashineGun(x2, y2)
-                                        elif tower_type == 2:
-                                            SmallGun(x2, y2)
-                                        elif tower_type == 3:
-                                            Rocket(x2, y2)
-                                        elif tower_type == 4:
-                                            PVO(x2, y2)
-                                        elif tower_type == 5:
-                                            BigGun(x2, y2)
+                    else:
+                        x1, y1 = event.pos
+                        # choose tower (clicked on tower menu)
+                        for tower in tower_menu_group:
+                            if tower.rect.collidepoint(x1, y1) and not tower_menu_clicked:
+                                tower_menu_clicked = True
+                                tower_type = tower.type
+                                break
+                        else:
+                            # clicked on field with chosen tower
+                            if tower_menu_clicked:
+                                # you can`t put tower on place with other tower
+                                for i in towers_group:
+                                    if i.rect.collidepoint(x1, y1):
                                         break
-                        tower_menu_clicked = False
+                                else:
+                                    for t in tower_place_group:
+                                        if t.rect.collidepoint(x1, y1):
+                                            x2, y2 = get_cell(event.pos)
+                                            TowerBase('92', x2, y2)
+                                            if tower_type == 1:
+                                                MashineGun(x2, y2)
+                                            elif tower_type == 2:
+                                                SmallGun(x2, y2)
+                                            elif tower_type == 3:
+                                                Rocket(x2, y2)
+                                            elif tower_type == 4:
+                                                PVO(x2, y2)
+                                            elif tower_type == 5:
+                                                BigGun(x2, y2)
+                                            break
+                                tower_menu_clicked = False
+
+                        # upgrade and sell
+                        for tower in towers_group:
+                            if tower.rect.collidepoint(x1, y1):
+                                upgrade_group.update(True)
+                                sell_group.update(True)
+                                break
+                        else:
+                            upgrade_group.update(False)
+                            sell_group.update(False)
 
             if event.type == pg.MOUSEBUTTONUP:
                 pass
