@@ -298,7 +298,7 @@ def load_level(fname):
             elif i == 2:
                 t = line.split()
                 width, height = int(t[0]), int(t[1])
-            elif 3 < i < height + 3:
+            elif 3 <= i < height + 3:
                 level_map.append(line.split())
             elif i == height + 3:
                 h = int(line.strip())
@@ -307,8 +307,8 @@ def load_level(fname):
             elif i == height + h + 3:
                 corners = int(line.strip())
             elif height + h + 3 < i < height + h + 3 + corners:
-                way.append([j for j in line.split()])
-                print(way)
+                way.append([int(j) for j in line.split()])
+        print(way)
 
     max_width = max(map(len, level_map))
     return level_map, decor_map
@@ -379,13 +379,15 @@ def generate_money():
     money_group.add(dol)
     dol.rect.x = 0
     dol.rect.y = 0
-    print(MONEY)
     x, y = 0, 0
     money = str(MONEY)
     for i in money:
         x += 0.5
-        print(i)
         Money(int(i), x, y)
+
+def generate_way():
+    for i in way:
+        pass
 
 
 def start_level(level):
