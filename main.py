@@ -423,19 +423,23 @@ def generate_money():
 def generate_way():
     global way
     full_way = []
-    full_way.append(way[0])
     for c in range(len(way) - 1):
+        full_way.append(way[c])
         if way[c][0] == way[c + 1][0]:
             if way[c][1] < way[c + 1][1]:
-                pass
+                for i in range(way[c][1] + 1, way[c + 1][1]):
+                    full_way.append([way[c][0], i, way[c][2]])
             else:
-                pass
+                for i in range(way[c][1] - 1, way[c + 1][1], -1):
+                    full_way.append([way[c][0], i, way[c][2]])
         else:
             if way[c][0] < way[c + 1][0]:
-                pass
+                for i in range(way[c][0] + 1, way[c + 1][0]):
+                    full_way.append([i, way[c][1], way[c][2]])
             else:
-                pass
-
+                for i in range(way[c][0] - 1, way[c + 1][0], -1):
+                    full_way.append([i, way[c][1], way[c][2]])
+    full_way.append(way[-1])
     way = full_way
     print(way)
 
@@ -477,7 +481,7 @@ def main():
     pause_obj()
     towers_menu()
     generate_money()
-    # generate_way()
+    generate_way()
     pg.display.flip()
 
     # create flags
