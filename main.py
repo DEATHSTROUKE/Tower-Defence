@@ -176,8 +176,9 @@ MONEY = 0
 LIVES = 0
 LEVEL = 0
 
-wigth, height = 20, 12
+wigth, height = 20, 13
 images = {}
+way = []
 tile_size = 64
 
 
@@ -284,7 +285,7 @@ class TowerMenu(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIVES, width, heigth
+    global MONEY, LIVES, width, heigth, way
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -296,13 +297,18 @@ def load_level(fname):
                 LIVES = int(line.strip())
             elif i == 2:
                 t = line.split()
-                width, height, start_x, start_y = int(t[0]), int(t[1]), int(t[2]), int(t[3])
+                width, height = int(t[0]), int(t[1])
             elif 3 < i < height + 3:
                 level_map.append(line.split())
             elif i == height + 3:
                 h = int(line.strip())
             elif height + 3 < i < height + h + 3:
                 decor_map.append(line.split())
+            elif i == height + h + 3:
+                corners = int(line.strip())
+            elif height + h + 3 < i < height + h + 3 + corners:
+                way.append([j for j in line.split()])
+                print(way)
 
     max_width = max(map(len, level_map))
     return level_map, decor_map
