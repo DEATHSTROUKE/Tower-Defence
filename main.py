@@ -305,6 +305,14 @@ class TowerBase(pg.sprite.Sprite):
         super().__init__(tower_base_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.level = 1
+
+    def upgrade(self):
+        self.level += 1
+        if self.level == 2:
+            self.image = images['93']
+        elif self.level == 3:
+            self.image = images['90']
 
 
 class MashineGun(Tower):
@@ -642,6 +650,7 @@ def main():
                             if up.rect.collidepoint(x1, y1):
                                 if chosen_tower:
                                     chosen_tower.upgrade()
+                                    chosen_tower_base.upgrade()
                                     break
                         for tower in towers_group:
                             if tower.rect.collidepoint(x1, y1):
