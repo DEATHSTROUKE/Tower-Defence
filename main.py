@@ -576,8 +576,19 @@ def generate_way():
     print(way)
 
 
-def generate_prices():
+def generate_prices(screen):
     """Makes prices for towers"""
+    font = pg.font.Font(None, 30)
+    # upgrade
+    screen.blit(font.render("$10", 1, (0, 0, 0)), (512, 700))
+    # sell
+    screen.blit(font.render("$10", 1, (0, 0, 0)), (672, 700))
+    # towers
+    screen.blit(font.render("$10", 1, (0, 0, 0)), (784, 700))
+    screen.blit(font.render("$30", 1, (0, 0, 0)), (880, 700))
+    screen.blit(font.render("$50", 1, (0, 0, 0)), (976, 700))
+    screen.blit(font.render("$150", 1, (0, 0, 0)), (1072, 700))
+    screen.blit(font.render("$200", 1, (0, 0, 0)), (1168, 700))
 
 
 def generate_waves():
@@ -648,8 +659,7 @@ def main():
                                 if pg.key.get_pressed()[pg.K_ESCAPE]:
                                     flag = False
                                     break
-                                if ev.type == pg.MOUSEBUTTONDOWN and 1210 < event.pos[0] < 1260 and \
-                                        0 < event.pos[1] < 40:
+                                if ev.type == pg.MOUSEBUTTONDOWN:
                                     flag = False
                                     break
                     else:
@@ -735,6 +745,7 @@ def main():
         if tower_menu_clicked:
             tower_place_group.draw(screen)
         pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 96)), 768, 640
+        generate_prices(screen)
         tower_menu_group.draw(screen)
         tower_base_group.draw(screen)
         towers_group.draw(screen)
