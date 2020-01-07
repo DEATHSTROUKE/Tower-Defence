@@ -175,10 +175,10 @@ sell_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
-LIVES = 0
+LIFES = 0
 LEVEL = 0
 
-wigth, height = 20, 13
+WIDTH, HEIGHT = 20, 13
 images = {}
 way = []
 tile_size = 64
@@ -415,7 +415,7 @@ class Sell(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIVES, width, heigth, way
+    global MONEY, LIFES, width, heigth, way
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -424,7 +424,7 @@ def load_level(fname):
             if i == 0:
                 MONEY = int(line.strip())
             elif i == 1:
-                LIVES = int(line.strip())
+                LIFES = int(line.strip())
             elif i == 2:
                 t = line.split()
                 width, height = int(t[0]), int(t[1])
@@ -444,6 +444,25 @@ def load_level(fname):
     return level_map, decor_map
 
 
+def generate_tiles():
+    """Makes dict with tiles and other objects"""
+    global images
+    for i in range(1, 303):
+        try:
+            images[str(i)] = load_image(f'Tiles/{str(i)}.png')
+        except BaseException:
+            try:
+                images[str(i)] = load_image(f'Decor/{str(i)}.png')
+            except BaseException:
+                try:
+                    images[str(i)] = load_image(f'Mobs/{str(i)}.png')
+                except BaseException:
+                    try:
+                        images[str(i)] = load_image(f'Towers/{str(i)}.png')
+                    except BaseException:
+                        pass
+
+
 def generate_level(level):
     """Makes level"""
     for x in range(len(level)):
@@ -452,7 +471,7 @@ def generate_level(level):
 
 
 def generate_decor(level):
-    """Make decorations on level"""
+    """Makes decorations on level"""
     for x in range(len(level)):
         for y in range(len(level[x])):
             if level[x][y] != '0':
@@ -492,9 +511,9 @@ def towers_menu():
 
 def get_cell(mouse_pos):
     """Get coords of cell"""
-    print(width, height)
+    print(width, HEIGHT)
     for x in range(width):
-        for y in range(height):
+        for y in range(HEIGHT):
             if x * tile_size <= mouse_pos[0] <= (x + 1) * tile_size and \
                     y * tile_size <= mouse_pos[1] <= (y + 1) * tile_size:
                 return x, y
@@ -502,7 +521,7 @@ def get_cell(mouse_pos):
 
 
 def generate_money():
-    """Make start money"""
+    """Makes start money"""
     global money_group
     money_group = pg.sprite.Group()
     dol = pg.sprite.Sprite()
@@ -519,6 +538,7 @@ def generate_money():
 
 
 def generate_way():
+    """Makes way for enemies"""
     global way
     full_way = []
     for c in range(len(way) - 1):
@@ -542,6 +562,18 @@ def generate_way():
     print(way)
 
 
+def generate_prices():
+    """Makes prices for towers"""
+
+
+def generate_waves():
+    """Makes waves of enemies"""
+
+
+def generate_lifes():
+    """Shows your remaining lifes"""
+
+
 def start_level(level):
     global LEVEL
     LEVEL = level
@@ -557,21 +589,7 @@ def main():
     screen.fill(pg.Color('black'))
 
     # make dict of tiles and other objects
-    for i in range(1, 303):
-        try:
-            images[str(i)] = load_image(f'Tiles/{str(i)}.png')
-        except BaseException:
-            try:
-                images[str(i)] = load_image(f'Decor/{str(i)}.png')
-            except BaseException:
-                try:
-                    images[str(i)] = load_image(f'Mobs/{str(i)}.png')
-                except BaseException:
-                    try:
-                        images[str(i)] = load_image(f'Towers/{str(i)}.png')
-                    except BaseException:
-                        pass
-
+    generate_tiles()
     # generate objects and groups on the main screen
     level, decor_map = load_level('map1.txt')
     generate_level(level)
@@ -605,11 +623,18 @@ def main():
                     if 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
                         # Pause
                         flag = True
+                        click = 0
                         while flag:
                             pause_group.draw(screen)
                             pg.display.flip()
                             for ev in pg.event.get():
                                 if pg.key.get_pressed()[pg.K_ESCAPE]:
+                                    flag = False
+                                    break
+                                if pg.MOUSEBUTTONDOWN:
+                                    click += 1
+                                if 1210 < event.pos[0] < 1260 and \
+                                        0 < event.pos[1] < 40 and click == 2:
                                     flag = False
                                     break
                     else:
