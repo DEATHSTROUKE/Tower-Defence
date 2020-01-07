@@ -177,6 +177,8 @@ sell_group = pg.sprite.Group()
 MONEY = 0
 LIFES = 0
 LEVEL = 0
+CURRENT_WAVE = 1
+WAVES = 1
 
 WIDTH, HEIGHT = 20, 13
 images = {}
@@ -426,7 +428,7 @@ class Sell(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIFES, width, heigth, way, waves
+    global MONEY, LIFES, WIDTH, HEIGHT, way, waves, WAVES
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -438,20 +440,21 @@ def load_level(fname):
                 LIFES = int(line.strip())
             elif i == 2:
                 t = line.split()
-                width, height = int(t[0]), int(t[1])
-            elif 3 <= i < height + 3:
+                WIDTH, HEIGHT = int(t[0]), int(t[1])
+            elif 3 <= i < HEIGHT + 3:
                 level_map.append(line.split())
-            elif i == height + 3:
+            elif i == HEIGHT + 3:
                 h = int(line.strip())
-            elif height + 3 < i < height + h + 3:
+            elif HEIGHT + 3 < i < HEIGHT + h + 3:
                 decor_map.append(line.split())
-            elif i == height + h + 3:
+            elif i == HEIGHT + h + 3:
                 corners = int(line.strip())
-            elif height + h + 3 < i < height + h + 3 + corners:
+            elif HEIGHT + h + 3 < i < HEIGHT + h + 3 + corners:
                 way.append([int(j) for j in line.split()])
-            elif i == height + h + 3 + corners:
+            elif i == HEIGHT + h + 3 + corners:
                 w = int(line.strip())
-            elif height + h + 3 + corners < i < height + h + 3 + corners + w:
+                WAVES = w
+            elif HEIGHT + h + 3 + corners < i < HEIGHT + h + 3 + corners + w:
                 waves.append([int(line.split()[0]), line.split()[1], int(line.split()[2])])
         print(waves)
     max_width = max(map(len, level_map))
@@ -580,27 +583,31 @@ def generate_prices(screen):
     """Makes prices for towers"""
     font = pg.font.Font(None, 30)
     # upgrade
-    screen.blit(font.render("$10", 1, (0, 0, 0)), (512, 700))
+    screen.blit(font.render('$10', 1, (0, 0, 0)), (512, 700))
     # sell
-    screen.blit(font.render("$10", 1, (0, 0, 0)), (672, 700))
+    screen.blit(font.render('$10', 1, (0, 0, 0)), (672, 700))
     # towers
-    screen.blit(font.render("$10", 1, (0, 0, 0)), (784, 700))
-    screen.blit(font.render("$30", 1, (0, 0, 0)), (880, 700))
-    screen.blit(font.render("$50", 1, (0, 0, 0)), (976, 700))
-    screen.blit(font.render("$150", 1, (0, 0, 0)), (1072, 700))
-    screen.blit(font.render("$200", 1, (0, 0, 0)), (1168, 700))
+    screen.blit(font.render('$10', 1, (0, 0, 0)), (784, 700))
+    screen.blit(font.render('$30', 1, (0, 0, 0)), (880, 700))
+    screen.blit(font.render('$50', 1, (0, 0, 0)), (976, 700))
+    screen.blit(font.render('$150', 1, (0, 0, 0)), (1072, 700))
+    screen.blit(font.render('$200', 1, (0, 0, 0)), (1168, 700))
 
 
 def generate_waves():
     """Makes waves of enemies"""
 
 
-def generate_lifes():
+def generate_lifes(screen):
     """Shows your remaining lifes"""
+    font = pg.font.Font(None, 50)
+    screen.blit(font.render(f'LIFE: {LIFES}', 1, (255, 255, 255)), (832, 16))
 
 
-def show_waves():
+def show_waves(screen):
     """Shows current wave and how many is remaining"""
+    font = pg.font.Font(None, 50)
+    screen.blit(font.render(f'{CURRENT_WAVE}/{WAVES}', 1, (255, 255, 255)), (448, 16))
 
 
 def start_level(level):
@@ -745,7 +752,11 @@ def main():
         if tower_menu_clicked:
             tower_place_group.draw(screen)
         pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 96)), 768, 640
+        # text on the screen
         generate_prices(screen)
+        generate_lifes(screen)
+        show_waves(screen)
+
         tower_menu_group.draw(screen)
         tower_base_group.draw(screen)
         towers_group.draw(screen)
