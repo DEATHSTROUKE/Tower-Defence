@@ -646,12 +646,21 @@ def main():
                                 tower_menu_clicked = False
 
                         # upgrade and sell
+                        # upgrade
                         for up in upgrade_group:
                             if up.rect.collidepoint(x1, y1):
                                 if chosen_tower:
                                     chosen_tower.upgrade()
                                     chosen_tower_base.upgrade()
                                     break
+                        # sell
+                        for se in sell_group:
+                            if se.rect.collidepoint(x1, y1):
+                                if chosen_tower:
+                                    chosen_tower.kill()
+                                    chosen_tower_base.kill()
+                                    break
+                        # choose tower to upgrade or sell
                         for tower in towers_group:
                             if tower.rect.collidepoint(x1, y1):
                                 upgrade_group.update(True)
