@@ -181,6 +181,7 @@ LEVEL = 0
 WIDTH, HEIGHT = 20, 13
 images = {}
 way = []
+waves = []
 tile_size = 64
 chosen_tower, chosen_tower_base = None, None
 
@@ -336,6 +337,8 @@ class SmallGun(Tower):
     def upgrade(self):
         self.level += 1
         if self.level == 2:
+            pass
+        elif self.level == 3:
             self.image = images['142']
 
 
@@ -345,7 +348,11 @@ class Rocket(Tower):
         self.level = 1
 
     def upgrade(self):
-        pass
+        self.level += 1
+        if self.level == 2:
+            pass
+        elif self.level == 3:
+            pass
 
 
 class PVO(Tower):
@@ -356,6 +363,8 @@ class PVO(Tower):
     def upgrade(self):
         self.level += 1
         if self.level == 2:
+            pass
+        if self.level == 3:
             self.image = images['119']
 
 
@@ -367,6 +376,8 @@ class BigGun(Tower):
     def upgrade(self):
         self.level += 1
         if self.level == 2:
+            pass
+        if self.level == 3:
             self.image = images['168']
 
 
@@ -415,7 +426,7 @@ class Sell(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIFES, width, heigth, way
+    global MONEY, LIFES, width, heigth, way, waves
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -438,8 +449,11 @@ def load_level(fname):
                 corners = int(line.strip())
             elif height + h + 3 < i < height + h + 3 + corners:
                 way.append([int(j) for j in line.split()])
-        print(way)
-
+            elif i == height + h + 3 + corners:
+                w = int(line.strip())
+            elif height + h + 3 + corners < i < height + h + 3 + corners + w:
+                waves.append([int(line.split()[0]), line.split()[1], int(line.split()[2])])
+        print(waves)
     max_width = max(map(len, level_map))
     return level_map, decor_map
 
@@ -574,6 +588,10 @@ def generate_lifes():
     """Shows your remaining lifes"""
 
 
+def show_waves():
+    """Shows current wave and how many is remaining"""
+
+
 def start_level(level):
     global LEVEL
     LEVEL = level
@@ -623,7 +641,6 @@ def main():
                     if 1210 < event.pos[0] < 1260 and 0 < event.pos[1] < 40:
                         # Pause
                         flag = True
-                        click = 0
                         while flag:
                             pause_group.draw(screen)
                             pg.display.flip()
@@ -631,10 +648,8 @@ def main():
                                 if pg.key.get_pressed()[pg.K_ESCAPE]:
                                     flag = False
                                     break
-                                if pg.MOUSEBUTTONDOWN:
-                                    click += 1
-                                if 1210 < event.pos[0] < 1260 and \
-                                        0 < event.pos[1] < 40 and click == 2:
+                                if ev.type == pg.MOUSEBUTTONDOWN and 1210 < event.pos[0] < 1260 and \
+                                        0 < event.pos[1] < 40:
                                     flag = False
                                     break
                     else:
@@ -703,9 +718,6 @@ def main():
                                 upgrade_group.update(False)
                                 sell_group.update(False)
 
-            if event.type == pg.MOUSEBUTTONUP:
-                pass
-
             if pg.key.get_pressed()[pg.K_F11]:
                 '''Change screen size'''
                 if fullscreen:
@@ -716,12 +728,13 @@ def main():
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
 
+        # groups and objects on screen
         tiles_group.draw(screen)
         obj_group.draw(screen)
         decors_group.draw(screen)
         if tower_menu_clicked:
             tower_place_group.draw(screen)
-        pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 64)), 768, 640
+        pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 96)), 768, 640
         tower_menu_group.draw(screen)
         tower_base_group.draw(screen)
         towers_group.draw(screen)
