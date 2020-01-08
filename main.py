@@ -1,15 +1,14 @@
-from random import choice, shuffle, random
 from copy import deepcopy
 import sys
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
-from PyQt5.QtWidgets import QLineEdit, QMainWindow, QCheckBox, QPlainTextEdit
-from PyQt5.QtWidgets import QFormLayout, QListWidget, QListWidgetItem, QDialog
+from PyQt5.QtWidgets import QLineEdit, QMainWindow
+from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 from PyQt5 import uic
 from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
-from time import time
+from time import time, sleep
 
 
 # Menu
@@ -178,7 +177,7 @@ sell_group = pg.sprite.Group()
 MONEY = 0
 LIFES = 0
 LEVEL = 0
-CURRENT_WAVE = 1
+CURRENT_WAVE = 0
 WAVES = 1
 FPS = 30
 
@@ -239,19 +238,23 @@ class Money(pg.sprite.Sprite):
 # Mobs
 
 class Mob(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
+    def __init__(self, tile_type, pos_x, pos_y, health, speed):
         super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
-        self.health = self.max_health = 100
-        self.speed = 20
+        self.health = self.max_health = health
+        self.speed = speed
 
         # controle points
-        self.destinations = deepcopy([i[:3] for i in way])
-        print(self.destinations)
-        self.visited = 0
+        self.dest = deepcopy([i[:2] for i in way])
+        for i in range(len(self.dest)):
+            self.dest[i][0] *= 64
+            self.dest[i][1] *= 64
+        self.visited = 1
+        self.pos = [pos_x * tile_size, pos_y * tile_size]
 
         self.last = time()
+        self.dt = 0
         self.healthbar = None
 
     def get_damage(self, damage):
@@ -268,36 +271,44 @@ class Mob(pg.sprite.Sprite):
         return self.health <= 0
 
     def has_destination(self):
-        return self.visited < len(self.destinations)
+        return self.visited < len(self.dest)
 
     def move(self):
-        steps = self.speed
+        global LIFES
+        steps = self.speed * self.dt
         while steps > 0 and self.has_destination():
-            x, y = self.position
-            destination = self.destinations[self.visited]
-            if self.position == destination:
+            x, y = self.pos
+            dest = self.dest[self.visited]
+            if self.pos == dest:
                 self.visited += 1
+                self.angle = way[self.visited][2]
+                self.image = pg.transform.rotate(self.image, self.angle)
                 continue
             sign_x = -1
-            if destination[0] > x:
+            if dest[0] > x:
                 sign_x = 1
-            elif destination[0] == x:
+            elif dest[0] == x:
                 sign_x = 0
             sign_y = -1
-            if destination[1] > y:
+            if dest[1] > y:
                 sign_y = 1
-            elif destination[1] == y:
+            elif dest[1] == y:
                 sign_y = 0
 
             x += sign_x
             y += sign_y
-            self.position = (x, y)
+            self.pos = [x, y]
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
             steps -= 1
+        if not self.has_destination():
+            self.kill()
+            LIFES -= 1
 
-    def game_logic(self):
+    def update(self):
         t = time()
-        self.dt = t - self.last_frame
-        self.last_frame = t
+        self.dt = t - self.last
+        self.last = t
 
         if self.health <= 0:
             self.dead()
@@ -307,21 +318,33 @@ class Mob(pg.sprite.Sprite):
 class Ball(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
+        health = 100
+        speed = 20
         if level == 1:
+            health = 100
+            speed = 20
             tile_type = '193'
         elif level == 2:
+            health = 200
+            speed = 50
             tile_type = '195'
         elif level == 3:
+            health = 400
+            speed = 100
             tile_type = '194'
         elif level == 4:
+            health = 800
+            speed = 300
             tile_type = '196'
-        super().__init__(tile_type, pos_x, pos_y)
+        super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
 
 
 class Frog(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
+        health = 100
+        speed = 10
         if level == 1:
             tile_type = '163'
         elif level == 2:
@@ -330,29 +353,33 @@ class Frog(Mob):
             tile_type = '166'
         elif level == 4:
             tile_type = '164'
-        super().__init__(tile_type, pos_x, pos_y)
+        super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
 
 
 class Tank(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
+        health = 100
+        speed = 10
         if level == 1:
             tile_type = '188'
         elif level == 2:
             tile_type = '189'
-        super().__init__(tile_type, pos_x, pos_y)
+        super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
 
 
 class Plain(Mob):
     def __init__(self, level, pos_x, pos_y):
         tile_type = ''
+        health = 100
+        speed = 10
         if level == 1:
             tile_type = '190'
         elif level == 2:
             tile_type = '192'
-        super().__init__(tile_type, pos_x, pos_y)
+        super().__init__(tile_type, pos_x, pos_y, health, speed)
 
 
 # Towers
@@ -517,14 +544,18 @@ def load_level(fname):
             elif i == HEIGHT + h + 3:
                 corners = int(line.strip())
             elif HEIGHT + h + 3 < i < HEIGHT + h + 3 + corners:
-                way.append([int(j) for j in line.split()])
+                way.append([float(j) for j in line.split()])
             elif i == HEIGHT + h + 3 + corners:
                 w = int(line.strip())
-                WAVES = w
+                WAVES = w - 1
             elif HEIGHT + h + 3 + corners < i < HEIGHT + h + 3 + corners + w:
-                waves.append([int(line.split()[0]), line.split()[1], int(line.split()[2])])
+                wave1 = line.split()
+                wave2 = []
+                for j in range(2, len(wave1), 3):
+                    sp = [int(wave1[j]), wave1[j - 1], int(wave1[j - 2])]
+                    wave2.append(sp)
+                waves.append(wave2)
         print(waves)
-    max_width = max(map(len, level_map))
     return level_map, decor_map
 
 
@@ -620,31 +651,6 @@ def generate_money():
         Money(int(i), x, y)
 
 
-def generate_way():
-    """Makes way for enemies"""
-    global way
-    full_way = []
-    for c in range(len(way) - 1):
-        full_way.append(way[c])
-        if way[c][0] == way[c + 1][0]:
-            if way[c][1] < way[c + 1][1]:
-                for i in range(way[c][1] + 1, way[c + 1][1]):
-                    full_way.append([way[c][0], i, way[c][2]])
-            else:
-                for i in range(way[c][1] - 1, way[c + 1][1], -1):
-                    full_way.append([way[c][0], i, way[c][2]])
-        else:
-            if way[c][0] < way[c + 1][0]:
-                for i in range(way[c][0] + 1, way[c + 1][0]):
-                    full_way.append([i, way[c][1], way[c][2]])
-            else:
-                for i in range(way[c][0] - 1, way[c + 1][0], -1):
-                    full_way.append([i, way[c][1], way[c][2]])
-    full_way.append(way[-1])
-    way = full_way
-    print(way)
-
-
 def generate_prices(screen):
     """Makes prices for towers"""
     font = pg.font.Font(None, 30)
@@ -660,8 +666,24 @@ def generate_prices(screen):
     screen.blit(font.render('$200', 1, (0, 0, 0)), (1168, 700))
 
 
-def generate_waves():
+def generate_wave():
     """Makes waves of enemies"""
+    global waves
+    if waves:
+        cur_wave = waves[0]
+        waves.pop(0)
+        for mob in cur_wave:
+            for k in range(mob[0]):
+                if mob[1] == 'ball':
+                    Ball(mob[2], way[0][0], way[0][1], way[0][2])
+                    if mob[2] == 1:
+                        sleep(1)
+                    elif mob[2] == 2:
+                        sleep(0.5)
+                    elif mob[2] == 3:
+                        sleep(0.3)
+                    else:
+                        sleep(0.1)
 
 
 def generate_lifes(screen):
@@ -684,7 +706,7 @@ def start_level(level):
 
 def main():
     """Main game function"""
-    global chosen_tower, chosen_tower_base
+    global chosen_tower, chosen_tower_base, CURRENT_WAVE
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     screen = pg.display.set_mode((1280, 720))
     fullscreen = False
@@ -700,7 +722,6 @@ def main():
     pause_obj()
     towers_menu()
     generate_money()
-    generate_way()
     pg.display.flip()
 
     # create flags
@@ -811,6 +832,10 @@ def main():
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
 
+        if len(mobs_group) == 0:
+            CURRENT_WAVE += 1
+            show_waves(screen)
+            generate_wave()
         # groups and objects on screen
         tiles_group.draw(screen)
         obj_group.draw(screen)
@@ -830,6 +855,7 @@ def main():
         upgrade_group.draw(screen)
         sell_group.draw(screen)
         mobs_group.draw(screen)
+        mobs_group.update()
         pg.display.flip()
 
     pg.quit()
