@@ -9,6 +9,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
+from time import time
 
 
 # Menu
@@ -179,6 +180,7 @@ LIFES = 0
 LEVEL = 0
 CURRENT_WAVE = 1
 WAVES = 1
+FPS = 30
 
 WIDTH, HEIGHT = 20, 13
 images = {}
@@ -241,6 +243,65 @@ class Mob(pg.sprite.Sprite):
         super().__init__(mobs_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.health = self.max_health = 100
+        self.speed = 20
+
+        # controle points
+        self.destinations = deepcopy([i[:3] for i in way])
+        print(self.destinations)
+        self.visited = 0
+
+        self.last = time()
+        self.healthbar = None
+
+    def get_damage(self, damage):
+        self.health -= damage
+
+    def is_alive(self):
+        return self.health > 0
+
+    def dead(self):
+        self.image = images['114']
+        self.speed = 0
+
+    def is_dead(self):
+        return self.health <= 0
+
+    def has_destination(self):
+        return self.visited < len(self.destinations)
+
+    def move(self):
+        steps = self.speed
+        while steps > 0 and self.has_destination():
+            x, y = self.position
+            destination = self.destinations[self.visited]
+            if self.position == destination:
+                self.visited += 1
+                continue
+            sign_x = -1
+            if destination[0] > x:
+                sign_x = 1
+            elif destination[0] == x:
+                sign_x = 0
+            sign_y = -1
+            if destination[1] > y:
+                sign_y = 1
+            elif destination[1] == y:
+                sign_y = 0
+
+            x += sign_x
+            y += sign_y
+            self.position = (x, y)
+            steps -= 1
+
+    def game_logic(self):
+        t = time()
+        self.dt = t - self.last_frame
+        self.last_frame = t
+
+        if self.health <= 0:
+            self.dead()
+        self.move()
 
 
 class Ball(Mob):
@@ -768,6 +829,7 @@ def main():
         money_group.draw(screen)
         upgrade_group.draw(screen)
         sell_group.draw(screen)
+        mobs_group.draw(screen)
         pg.display.flip()
 
     pg.quit()
