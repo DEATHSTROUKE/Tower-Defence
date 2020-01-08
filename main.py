@@ -266,6 +266,8 @@ class Mob(pg.sprite.Sprite):
     def dead(self):
         self.image = images['114']
         self.speed = 0
+        sleep(3)
+        self.kill()
 
     def is_dead(self):
         return self.health <= 0
@@ -281,8 +283,11 @@ class Mob(pg.sprite.Sprite):
             dest = self.dest[self.visited]
             if self.pos == dest:
                 self.visited += 1
-                self.angle = way[self.visited][2]
-                self.image = pg.transform.rotate(self.image, self.angle)
+                try:
+                    self.angle = way[self.visited][2]
+                    self.image = pg.transform.rotate(self.image, self.angle)
+                except BaseException:
+                    pass
                 continue
             sign_x = -1
             if dest[0] > x:
@@ -684,6 +689,8 @@ def generate_wave():
                         sleep(0.3)
                     else:
                         sleep(0.1)
+    else:
+        game_over()
 
 
 def generate_lifes(screen):
@@ -702,6 +709,13 @@ def start_level(level):
     global LEVEL
     LEVEL = level
     main()
+
+
+def game_over():
+    if LIFES > 0:
+        pass
+    else:
+        pass
 
 
 def main():
@@ -833,9 +847,12 @@ def main():
                     fullscreen = True
 
         if len(mobs_group) == 0:
+            # start wave
             CURRENT_WAVE += 1
             show_waves(screen)
             generate_wave()
+        if LIFES <= 0:
+            game_over()
         # groups and objects on screen
         tiles_group.draw(screen)
         obj_group.draw(screen)
