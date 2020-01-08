@@ -383,6 +383,12 @@ class BigGun(Tower):
             self.image = images['168']
 
 
+# Bullets
+
+class Bullet(pg.sprite.Sprite):
+    pass
+
+
 # Tower Menu
 
 class TowerMenu(pg.sprite.Sprite):
@@ -528,8 +534,7 @@ def towers_menu():
 
 def get_cell(mouse_pos):
     """Get coords of cell"""
-    print(width, HEIGHT)
-    for x in range(width):
+    for x in range(WIDTH):
         for y in range(HEIGHT):
             if x * tile_size <= mouse_pos[0] <= (x + 1) * tile_size and \
                     y * tile_size <= mouse_pos[1] <= (y + 1) * tile_size:
