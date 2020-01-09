@@ -9,6 +9,7 @@ from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
 from time import time, sleep
+import math
 
 
 # Menu
@@ -172,6 +173,7 @@ money_group = pg.sprite.Group()
 tower_base_group = pg.sprite.Group()
 upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
+bullet_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -180,6 +182,7 @@ LEVEL = 0
 CURRENT_WAVE = 0
 WAVES = 1
 FPS = 30
+MOD = 1
 
 WIDTH, HEIGHT = 20, 13
 images = {}
@@ -287,7 +290,7 @@ class Mob(pg.sprite.Sprite):
                     self.angle = way[self.visited][2]
                     self.image = pg.transform.rotate(self.image, self.angle)
                 except BaseException:
-                    pass
+                    self.kill()
                 continue
             sign_x = -1
             if dest[0] > x:
@@ -341,6 +344,7 @@ class Ball(Mob):
             health = 800
             speed = 300
             tile_type = '196'
+        health *= MOD
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
 
@@ -348,16 +352,25 @@ class Ball(Mob):
 class Frog(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
-        health = 100
+        health = 200
         speed = 10
         if level == 1:
             tile_type = '163'
+            health = 200
+            speed = 10
         elif level == 2:
             tile_type = '165'
+            health = 500
+            speed = 20
         elif level == 3:
             tile_type = '166'
+            health = 1000
+            speed = 50
         elif level == 4:
             tile_type = '164'
+            health = 2000
+            speed = 100
+        health *= MOD
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
 
@@ -365,35 +378,132 @@ class Frog(Mob):
 class Tank(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
-        health = 100
-        speed = 10
+        health = 2000
+        speed = 20
         if level == 1:
             tile_type = '188'
+            health = 2000
+            speed = 20
         elif level == 2:
             tile_type = '189'
+            health = 5000
+            speed = 50
+        health *= MOD
         super().__init__(tile_type, pos_x, pos_y, health, speed)
-        self.image = pg.transform.rotate(self.image, angle)
+        self.image = pg.transform.rotate(self.image, 180)
 
 
 class Plain(Mob):
-    def __init__(self, level, pos_x, pos_y):
+    def __init__(self, level):
         tile_type = ''
-        health = 100
-        speed = 10
+        health = 200
+        speed = 50
         if level == 1:
             tile_type = '190'
+            health = 200
+            speed = 50
         elif level == 2:
             tile_type = '192'
-        super().__init__(tile_type, pos_x, pos_y, health, speed)
+            health = 500
+            speed = 100
+        health *= MOD
+        super().__init__(tile_type, -0.5, HEIGHT // 2, health, speed)
+
+    def move(self):
+        global LIFES
+        steps = self.speed * self.dt
+        while steps > 0 and self.pos[0] < (WIDTH + 2) * tile_size:
+            x, y = self.pos
+            sign_x = 1
+            x += sign_x
+            self.pos = [x, y]
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
+            steps -= 1
+        if not self.pos[0] < (WIDTH + 2) * tile_size:
+            self.kill()
+            LIFES -= 1
+
+    def update(self):
+        t = time()
+        self.dt = t - self.last
+        self.last = t
+
+        if self.health <= 0:
+            self.dead()
+        self.move()
 
 
 # Towers
 
 class Tower(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
+    def __init__(self, tile_type, pos_x, pos_y, damage, range, speed, cost_up, sell):
         super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.cost = cost_up
+        self.sell = sell
+        self.range = range
+        self.active = False
+        self.level = 0
+        self.speed = speed
+
+        self.bullet_damage = damage
+        self.bullet_image = None
+        self.bullet_speed = 1000
+
+        self.last_attack = self.speed
+
+        self.target = None
+        self.bullets = pg.sprite.Group()
+
+    def get_cost(self):
+        return self.cost
+
+    def get_range(self):
+        return self.range[self.level]
+
+    def is_active(self):
+        return self.active
+
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
+
+    def in_range(self, position):
+        px, py = position
+        # cx, cy = self.get_position()
+        cx, cy = self.get_center()
+        distance = math.sqrt((px - cx) ** 2 + (py - cy) ** 2)
+        return distance <= self.range[self.level]
+
+    def can_attack(self):
+        return time() - self.last_attack >= 1.0 / self.speed
+
+    def attack(self, target):
+        b = self.bullet_type(self.get_center(), self.bullet_width, self.bullet_height, self.bullet_image,
+                             self.bullet_damage[self.level], self.bullet_speed)
+        b.set_target(target)
+        self.bullets.add(b)
+        self.last_attack = time()
+
+    def update(self):
+        # self.bullets.draw(screen)
+        if self.target is not None and self.target.is_dead():
+            self.target = None
+
+        if self.can_attack():
+            if self.target is not None and self.in_range(self.target.get_center()):
+                self.attack(self.target)
+            else:
+                for mob in mobs_group:
+                    if self.in_range(mob.get_center()):
+                        self.target = mob
+                        self.attack(mob)
+                        self.fs_last_attack = 0
+                        break
 
 
 class TowerBase(pg.sprite.Sprite):
@@ -527,7 +637,7 @@ class Sell(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIFES, WIDTH, HEIGHT, way, waves, WAVES
+    global MONEY, LIFES, WIDTH, HEIGHT, way, waves, WAVES, MOD
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -536,7 +646,9 @@ def load_level(fname):
             if i == 0:
                 MONEY = int(line.strip())
             elif i == 1:
-                LIFES = int(line.strip())
+                m = line.split()
+                LIFES = int(m[0])
+                MOD = float(m[1])
             elif i == 2:
                 t = line.split()
                 WIDTH, HEIGHT = int(t[0]), int(t[1])
@@ -675,6 +787,9 @@ def generate_wave():
     """Makes waves of enemies"""
     global waves
     if waves:
+        for i in mobs_group:
+            i.kill()
+            pg.display.flip()
         cur_wave = waves[0]
         waves.pop(0)
         for mob in cur_wave:
@@ -689,6 +804,28 @@ def generate_wave():
                         sleep(0.3)
                     else:
                         sleep(0.1)
+                elif mob[1] == 'frog':
+                    Frog(mob[2], way[0][0], way[0][1], way[0][2])
+                    if mob[2] == 1:
+                        sleep(2)
+                    elif mob[2] == 2:
+                        sleep(1)
+                    elif mob[2] == 3:
+                        sleep(0.5)
+                    else:
+                        sleep(0.2)
+                elif mob[1] == 'tank':
+                    Tank(mob[2], way[0][0], way[0][1], way[0][2])
+                    if mob[2] == 1:
+                        sleep(4)
+                    elif mob[2] == 2:
+                        sleep(2)
+                elif mob[1] == 'plain':
+                    Plain(mob[2])
+                    if mob[2] == 1:
+                        sleep(1)
+                    elif mob[2] == 2:
+                        sleep(0.5)
     else:
         game_over()
 
@@ -846,13 +983,6 @@ def main():
                     screen = pg.display.set_mode(size, pg.FULLSCREEN)
                     fullscreen = True
 
-        if len(mobs_group) == 0:
-            # start wave
-            CURRENT_WAVE += 1
-            show_waves(screen)
-            generate_wave()
-        if LIFES <= 0:
-            game_over()
         # groups and objects on screen
         tiles_group.draw(screen)
         obj_group.draw(screen)
@@ -874,6 +1004,14 @@ def main():
         mobs_group.draw(screen)
         mobs_group.update()
         pg.display.flip()
+
+        if len(mobs_group) == 0:
+            # start wave
+            CURRENT_WAVE += 1
+            show_waves(screen)
+            generate_wave()
+        if LIFES <= 0:
+            game_over()
 
     pg.quit()
     # menu()
