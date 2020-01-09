@@ -266,6 +266,9 @@ class Mob(pg.sprite.Sprite):
     def is_alive(self):
         return self.health > 0
 
+    def get_center(self):
+        return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
+
     def dead(self):
         self.image = images['114']
         self.speed = 0
@@ -437,15 +440,17 @@ class Plain(Mob):
 # Towers
 
 class Tower(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y, damage, range, speed, cost_up, sell):
+    def __init__(self, tile_type, pos_x, pos_y, damage, rng, speed, cost_up, sell):
         super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.pos = pos_x, pos_y
+        self.angle = 0
         self.cost = cost_up
         self.sell = sell
-        self.range = range
+        self.range = rng
         self.active = False
-        self.level = 0
+        self.level = 1
         self.speed = speed
 
         self.bullet_damage = damage
@@ -472,12 +477,14 @@ class Tower(pg.sprite.Sprite):
     def deactivate(self):
         self.active = False
 
-    def in_range(self, position):
-        px, py = position
-        # cx, cy = self.get_position()
+    def get_center(self):
+        return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
+
+    def in_range(self, pos):
+        px, py = pos
         cx, cy = self.get_center()
         distance = math.sqrt((px - cx) ** 2 + (py - cy) ** 2)
-        return distance <= self.range[self.level]
+        return distance <= self.range
 
     def can_attack(self):
         return time() - self.last_attack >= 1.0 / self.speed
@@ -496,7 +503,8 @@ class Tower(pg.sprite.Sprite):
 
         if self.can_attack():
             if self.target is not None and self.in_range(self.target.get_center()):
-                self.attack(self.target)
+                # self.attack(self.target)
+                print('attack')
             else:
                 for mob in mobs_group:
                     if self.in_range(mob.get_center()):
@@ -589,7 +597,53 @@ class BigGun(Tower):
 # Bullets
 
 class Bullet(pg.sprite.Sprite):
-    pass
+    def __init__(self, tile_type, pos_x, pos_y, damage, speed):
+        super().__init__(bullet_group, all_sprites)
+        self.damage = damage
+        self.speed = speed
+        self.target = None
+        self.image = images[tile_type]
+        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.pos = pos_x, pos_y
+
+        # frame rate independent data
+        self.last_frame = time()
+        self.dt = 0
+
+    def get_damage(self):
+        return self.damage
+
+    def set_target(self, target):
+        self.target = target
+
+    def get_center(self):
+        return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
+
+    def move(self):
+        if self.target is None:
+            return
+
+        # move based on center points
+        dest = self.target.get_center()
+        curr = self.get_center()
+
+        direction = (dest[0] - curr[0], dest[1] - curr[1])
+        x = direction[0] ** 2
+        y = direction[1] ** 2
+
+        # normalize the direction vector
+        mag = math.sqrt(float(x) + float(y))
+        normalized = (direction[0] / mag, direction[1] / mag)
+        dist = min(self.speed * self.dt, math.sqrt(x + y))
+        self.pos = (self.pos[0] + dist * normalized[0], self.pos[1] + dist * normalized[1])
+
+    def update(self):
+        t = time()
+        self.dt = t - self.last_frame
+        self.last_frame = t
+        self.move()
+        if self.target is None or self.target.is_dead():
+            self.kill()
 
 
 # Tower Menu
