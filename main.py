@@ -175,7 +175,6 @@ upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 dead_group = pg.sprite.Group()
-healbars_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -240,11 +239,37 @@ class Money(pg.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
 
-# Healbar
+# Healthbar
+class HealthBar:
+    def __init__(self, pos, max_health, width=tile_size // 2, height=5):
+        self.max_health = max_health
+        self.pos = pos
+        self.current_health = max_health
+        self.width = width
+        self.height = height
+        self.current_width = width
+        self.bg_color = (255, 0, 0)
+        self.color = (0, 255, 0)
+        self.place_bar()
 
-class HealBar(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__(healbars_group, all_sprites)
+    # creates the rectangles that represent the health
+    def place_bar(self):
+        self.bg = pg.rect.Rect(self.pos, (self.width, self.height))
+        self.current = pg.rect.Rect(self.pos, (self.current_width, self.height))
+
+    def update_health(self, value):
+        if self.current_health != value:
+            self.current_health = value
+            perc = float(self.current_health) / self.max_health
+            self.current_width = min(self.width, self.width * perc)
+
+    def set_position(self, pos):
+        self.pos = pos
+        self.place_bar()
+
+    def paint(self, surface):
+        pg.draw.rect(surface, self.bg_color, self.bg)
+        pg.draw.rect(surface, self.color, self.current)
 
 
 # Mobs
@@ -255,6 +280,7 @@ class Mob(pg.sprite.Sprite):
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
         self.health = self.max_health = health
+
         self.speed = speed
 
         # controle points
@@ -268,12 +294,26 @@ class Mob(pg.sprite.Sprite):
         self.last = time()
         self.dt = 0
         self.healthbar = None
+        self.setup_healthbar()
 
     def get_damage(self, damage):
         self.health -= damage
 
     def is_alive(self):
         return self.health > 0
+
+    def setup_healthbar(self):
+        health_pos = self.pos[0] + 0.5 * tile_size - 0.5 * tile_size // 2, self.pos[1] - 5
+        print(self.pos)
+        print(health_pos)
+        self.healthbar = HealthBar(health_pos, self.max_health)
+
+    def paint_health(self, surface):
+        self.healthbar.paint(surface)
+
+    def set_health_pos(self):
+        self.healthbar.set_position((self.pos[0] + 0.5 * tile_size - 0.5 * tile_size // 2,
+                                     self.pos[1] - 5))
 
     def get_center(self):
         return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
@@ -326,13 +366,20 @@ class Mob(pg.sprite.Sprite):
             self.kill()
             LIFES -= 1
 
-    def update(self):
+    def update(self, screen):
         t = time()
         self.dt = t - self.last
         self.last = t
 
         if self.health <= 0:
+            self.healthbar = None
             self.dead()
+        try:
+            self.healthbar.update_health(self.health)
+            self.set_health_pos()
+            self.paint_health(screen)
+        except BaseException:
+            pass
         self.move()
 
 
@@ -1141,10 +1188,9 @@ def main():
         sell_group.draw(screen)
         mobs_group.draw(screen)
         dead_group.draw(screen)
-        mobs_group.update()
+        mobs_group.update(screen)
         towers_group.update(screen)
         bullet_group.update()
-        healbars_group.draw(screen)
         pg.display.flip()
 
         if len(mobs_group) == 0:
