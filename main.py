@@ -444,20 +444,23 @@ class Tower(pg.sprite.Sprite):
         super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
-        self.pos = pos_x, pos_y
+        self.pos = pos_x * tile_size, pos_y * tile_size
         self.angle = 0
         self.cost = cost_up
         self.sell = sell
         self.range = rng
         self.active = False
         self.level = 1
+        self.speed_rot = 300
         self.speed = speed
 
+        self.bullet_type = Bullet
         self.bullet_damage = damage
-        self.bullet_image = None
-        self.bullet_speed = 1000
+        self.bullet_speed = 50
 
-        self.last_attack = self.speed
+        self.last_attack = self.speed_rot
+        self.last_angle = 0
+        self.dt = 0
 
         self.target = None
         self.bullets = pg.sprite.Group()
@@ -486,32 +489,48 @@ class Tower(pg.sprite.Sprite):
         distance = math.sqrt((px - cx) ** 2 + (py - cy) ** 2)
         return distance <= self.range
 
+    def dist(self, pos):
+        return math.sqrt((self.get_center()[0] - pos[0]) ** 2 +
+                         (self.get_center()[1] - pos[1]) ** 2)
+
     def can_attack(self):
         return time() - self.last_attack >= 1.0 / self.speed
 
     def attack(self, target):
-        b = self.bullet_type(self.get_center(), self.bullet_width, self.bullet_height, self.bullet_image,
-                             self.bullet_damage[self.level], self.bullet_speed)
+        b = self.bullet_type(self.get_center()[0], self.get_center()[1],
+                             self.bullet_damage, self.bullet_speed)
         b.set_target(target)
         self.bullets.add(b)
         self.last_attack = time()
+        print(b)
 
-    def update(self):
-        # self.bullets.draw(screen)
+    def turn(self):
+        x, y = self.target.get_center()
+        rel_x, rel_y = x - self.rect.x, y - self.rect.y
+        angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
+        print(angle)
+        self.image = pg.transform.rotate(self.image, int(angle))
+        self.rect = self.image.get_rect(center=self.pos)
+
+    def update(self, screen):
+        self.bullets.draw(screen)
         if self.target is not None and self.target.is_dead():
             self.target = None
-
         if self.can_attack():
             if self.target is not None and self.in_range(self.target.get_center()):
-                # self.attack(self.target)
-                print('attack')
+                self.attack(self.target)
+                t = time()
+                self.dt = t - self.last_angle
+                self.last_angle = t
+                # self.image = pg.transform.rotate(self.image, 1)
+                # if self.dt > 0.05:
+                #     self.turn()
             else:
+                min_s = 99999
                 for mob in mobs_group:
-                    if self.in_range(mob.get_center()):
+                    if self.in_range(mob.get_center()) and self.dist(mob.get_center()) < min_s:
                         self.target = mob
-                        self.attack(mob)
-                        self.fs_last_attack = 0
-                        break
+                        min_s = self.dist(mob.get_center())
 
 
 class TowerBase(pg.sprite.Sprite):
@@ -531,8 +550,9 @@ class TowerBase(pg.sprite.Sprite):
 
 class MashineGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('300', pos_x, pos_y)
+        super().__init__('300', pos_x, pos_y, 50, 300, 300, 8, 6)
         self.level = 1
+        self.bullet_type = MGBullet
 
     def upgrade(self):
         self.level += 1
@@ -544,8 +564,9 @@ class MashineGun(Tower):
 
 class SmallGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('117', pos_x, pos_y)
+        super().__init__('117', pos_x, pos_y, 200, 200, 300, 30, 15)
         self.level = 1
+        self.bullet_type = SmallBullet
 
     def upgrade(self):
         self.level += 1
@@ -557,8 +578,9 @@ class SmallGun(Tower):
 
 class Rocket(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('118', pos_x, pos_y)
+        super().__init__('118', pos_x, pos_y, 300, 300, 300, 40, 20)
         self.level = 1
+        self.bullet_type = SmallRocketBullet
 
     def upgrade(self):
         self.level += 1
@@ -570,8 +592,9 @@ class Rocket(Tower):
 
 class PVO(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('120', pos_x, pos_y)
+        super().__init__('120', pos_x, pos_y, 500, 1000, 300, 120, 80)
         self.level = 1
+        self.bullet_type = PVOBullet
 
     def upgrade(self):
         self.level += 1
@@ -583,8 +606,9 @@ class PVO(Tower):
 
 class BigGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('167', pos_x, pos_y)
+        super().__init__('167', pos_x, pos_y, 1000, 1000, 300, 200, 100)
         self.level = 1
+        self.bullet_type = BigBullet
 
     def upgrade(self):
         self.level += 1
@@ -644,6 +668,31 @@ class Bullet(pg.sprite.Sprite):
         self.move()
         if self.target is None or self.target.is_dead():
             self.kill()
+
+
+class MGBullet(Bullet):
+    def __init__(self, pos_x, pos_y, damage, speed):
+        super().__init__('303', pos_x, pos_y, damage, speed)
+
+
+class SmallBullet(Bullet):
+    def __init__(self, pos_x, pos_y, damage, speed):
+        super().__init__('218', pos_x, pos_y, damage, speed)
+
+
+class SmallRocketBullet(Bullet):
+    def __init__(self, pos_x, pos_y, damage, speed):
+        super().__init__('170', pos_x, pos_y, damage, speed)
+
+
+class PVOBullet(Bullet):
+    def __init__(self, pos_x, pos_y, damage, speed):
+        super().__init__('171', pos_x, pos_y, damage, speed)
+
+
+class BigBullet(Bullet):
+    def __init__(self, pos_x, pos_y, damage, speed):
+        super().__init__('219', pos_x, pos_y, damage, speed)
 
 
 # Tower Menu
@@ -733,7 +782,7 @@ def load_level(fname):
 def generate_tiles():
     """Makes dict with tiles and other objects"""
     global images
-    for i in range(1, 303):
+    for i in range(1, 304):
         try:
             images[str(i)] = load_image(f'Tiles/{str(i)}.png')
         except BaseException:
@@ -933,6 +982,10 @@ def main():
     tower_menu_clicked = False
     tower_type = 0
 
+    # test
+    TowerBase('92', 4, 5)
+    MashineGun(4, 5)
+
     clock = pg.time.Clock()
     running = True
     while running:
@@ -1056,7 +1109,9 @@ def main():
         upgrade_group.draw(screen)
         sell_group.draw(screen)
         mobs_group.draw(screen)
+        bullet_group.draw(screen)
         mobs_group.update()
+        towers_group.update(screen)
         pg.display.flip()
 
         if len(mobs_group) == 0:
