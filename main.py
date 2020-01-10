@@ -502,7 +502,6 @@ class Tower(pg.sprite.Sprite):
         b.set_target(target)
         self.bullets.add(b)
         self.last_attack = time()
-        print(b)
 
     def turn(self):
         x, y = self.target.get_center()
@@ -513,7 +512,6 @@ class Tower(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos)
 
     def update(self, screen):
-        self.bullets.draw(screen)
         if self.target is not None and self.target.is_dead():
             self.target = None
         if self.can_attack():
@@ -665,9 +663,14 @@ class Bullet(pg.sprite.Sprite):
         t = time()
         self.dt = t - self.last_frame
         self.last_frame = t
+        print(self.pos)
         self.move()
         if self.target is None or self.target.is_dead():
             self.kill()
+        elif self.rect.collipoint(self.target) or self.target.rect.collide(self):
+            self.target.hit(self.get_damage())
+            if self.target.is_dead():
+                self.kill()
 
 
 class MGBullet(Bullet):
@@ -984,7 +987,7 @@ def main():
 
     # test
     TowerBase('92', 4, 5)
-    MashineGun(4, 5)
+    Rocket(4, 5)
 
     clock = pg.time.Clock()
     running = True
@@ -1112,6 +1115,7 @@ def main():
         bullet_group.draw(screen)
         mobs_group.update()
         towers_group.update(screen)
+        bullet_group.update()
         pg.display.flip()
 
         if len(mobs_group) == 0:
