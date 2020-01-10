@@ -174,6 +174,7 @@ tower_base_group = pg.sprite.Group()
 upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
+dead_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -272,8 +273,9 @@ class Mob(pg.sprite.Sprite):
     def dead(self):
         self.image = images['114']
         self.speed = 0
-        sleep(3)
         self.kill()
+        dead_group.add(self)
+        self.dead_time = time()
 
     def is_dead(self):
         return self.health <= 0
@@ -456,7 +458,7 @@ class Tower(pg.sprite.Sprite):
 
         self.bullet_type = Bullet
         self.bullet_damage = damage
-        self.bullet_speed = 50
+        self.bullet_speed = 300
 
         self.last_attack = self.speed_rot
         self.last_angle = 0
@@ -512,6 +514,7 @@ class Tower(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos)
 
     def update(self, screen):
+        # self.bullets.draw(screen)
         if self.target is not None and self.target.is_dead():
             self.target = None
         if self.can_attack():
@@ -548,7 +551,7 @@ class TowerBase(pg.sprite.Sprite):
 
 class MashineGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('300', pos_x, pos_y, 50, 300, 300, 8, 6)
+        super().__init__('300', pos_x, pos_y, 50, 300, 20, 8, 6)
         self.level = 1
         self.bullet_type = MGBullet
 
@@ -562,7 +565,7 @@ class MashineGun(Tower):
 
 class SmallGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('117', pos_x, pos_y, 200, 200, 300, 30, 15)
+        super().__init__('117', pos_x, pos_y, 200, 200, 1, 30, 15)
         self.level = 1
         self.bullet_type = SmallBullet
 
@@ -576,7 +579,7 @@ class SmallGun(Tower):
 
 class Rocket(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('118', pos_x, pos_y, 300, 300, 300, 40, 20)
+        super().__init__('118', pos_x, pos_y, 300, 300, 1, 40, 20)
         self.level = 1
         self.bullet_type = SmallRocketBullet
 
@@ -590,7 +593,7 @@ class Rocket(Tower):
 
 class PVO(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('120', pos_x, pos_y, 500, 1000, 300, 120, 80)
+        super().__init__('120', pos_x, pos_y, 500, 1000, 1, 120, 80)
         self.level = 1
         self.bullet_type = PVOBullet
 
@@ -604,7 +607,7 @@ class PVO(Tower):
 
 class BigGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('167', pos_x, pos_y, 1000, 1000, 300, 200, 100)
+        super().__init__('167', pos_x, pos_y, 1000, 1000, 1, 200, 100)
         self.level = 1
         self.bullet_type = BigBullet
 
@@ -625,7 +628,8 @@ class Bullet(pg.sprite.Sprite):
         self.speed = speed
         self.target = None
         self.image = images[tile_type]
-        self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.mask = pg.mask.from_surface(self.image)
         self.pos = pos_x, pos_y
 
         # frame rate independent data
@@ -655,20 +659,25 @@ class Bullet(pg.sprite.Sprite):
 
         # normalize the direction vector
         mag = math.sqrt(float(x) + float(y))
-        normalized = (direction[0] / mag, direction[1] / mag)
+        try:
+            normalized = (direction[0] / mag, direction[1] / mag)
+        except ZeroDivisionError:
+            normalized = (0, 0)
         dist = min(self.speed * self.dt, math.sqrt(x + y))
         self.pos = (self.pos[0] + dist * normalized[0], self.pos[1] + dist * normalized[1])
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
 
     def update(self):
         t = time()
         self.dt = t - self.last_frame
         self.last_frame = t
-        print(self.pos)
         self.move()
         if self.target is None or self.target.is_dead():
             self.kill()
-        elif self.rect.collipoint(self.target) or self.target.rect.collide(self):
-            self.target.hit(self.get_damage())
+        # elif pg.sprite.collide_mask(self, self.target):
+        elif pg.sprite.collide_mask(self, self.target):
+            self.target.get_damage(self.get_damage())
             if self.target.is_dead():
                 self.kill()
 
@@ -891,7 +900,8 @@ def generate_prices(screen):
 
 def generate_wave():
     """Makes waves of enemies"""
-    global waves
+    global waves, dead_group
+    dead_group = pg.sprite.Group()
     if waves:
         for i in mobs_group:
             i.kill()
@@ -1113,6 +1123,7 @@ def main():
         sell_group.draw(screen)
         mobs_group.draw(screen)
         bullet_group.draw(screen)
+        dead_group.draw(screen)
         mobs_group.update()
         towers_group.update(screen)
         bullet_group.update()
