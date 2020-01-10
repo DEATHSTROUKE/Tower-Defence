@@ -175,6 +175,7 @@ upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 dead_group = pg.sprite.Group()
+healbars_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -237,6 +238,13 @@ class Money(pg.sprite.Sprite):
 
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
+
+
+# Healbar
+
+class HealBar(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__(healbars_group, all_sprites)
 
 
 # Mobs
@@ -399,7 +407,7 @@ class Tank(Mob):
 
 
 class Plain(Mob):
-    def __init__(self, level):
+    def __init__(self, level, pos_x):
         tile_type = ''
         health = 200
         speed = 50
@@ -412,7 +420,7 @@ class Plain(Mob):
             health = 500
             speed = 100
         health *= MOD
-        super().__init__(tile_type, -0.5, HEIGHT // 2, health, speed)
+        super().__init__(tile_type, pos_x, HEIGHT // 2, health, speed)
 
     def move(self):
         global LIFES
@@ -445,6 +453,7 @@ class Tower(pg.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, damage, rng, speed, cost_up, sell):
         super().__init__(towers_group, all_sprites)
         self.image = images[tile_type]
+        self.orig_image = self.image
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
         self.pos = pos_x * tile_size, pos_y * tile_size
         self.angle = 0
@@ -458,7 +467,7 @@ class Tower(pg.sprite.Sprite):
 
         self.bullet_type = Bullet
         self.bullet_damage = damage
-        self.bullet_speed = 300
+        self.bullet_speed = 700
 
         self.last_attack = self.speed_rot
         self.last_angle = 0
@@ -499,7 +508,7 @@ class Tower(pg.sprite.Sprite):
         return time() - self.last_attack >= 1.0 / self.speed
 
     def attack(self, target):
-        b = self.bullet_type(self.get_center()[0], self.get_center()[1],
+        b = self.bullet_type(self.pos[0], self.pos[1],
                              self.bullet_damage, self.bullet_speed)
         b.set_target(target)
         self.bullets.add(b)
@@ -508,24 +517,23 @@ class Tower(pg.sprite.Sprite):
     def turn(self):
         x, y = self.target.get_center()
         rel_x, rel_y = x - self.rect.x, y - self.rect.y
-        angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
-        print(angle)
-        self.image = pg.transform.rotate(self.image, int(angle))
-        self.rect = self.image.get_rect(center=self.pos)
+        angle = 270 + (180 / math.pi) * -math.atan2(rel_y, rel_x)
+        self.image = pg.transform.rotate(self.orig_image, int(angle) % 360)
+        self.rect = self.image.get_rect(center=self.get_center())
 
     def update(self, screen):
         # self.bullets.draw(screen)
         if self.target is not None and self.target.is_dead():
             self.target = None
+        if self.target:
+            self.turn()
+
         if self.can_attack():
             if self.target is not None and self.in_range(self.target.get_center()):
                 self.attack(self.target)
                 t = time()
                 self.dt = t - self.last_angle
                 self.last_angle = t
-                # self.image = pg.transform.rotate(self.image, 1)
-                # if self.dt > 0.05:
-                #     self.turn()
             else:
                 min_s = 99999
                 for mob in mobs_group:
@@ -551,7 +559,9 @@ class TowerBase(pg.sprite.Sprite):
 
 class MashineGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('300', pos_x, pos_y, 50, 300, 20, 8, 6)
+        super().__init__('300', pos_x, pos_y, 25, 200, 30, 8, 6)
+        self.image = pg.transform.rotate(self.image, 270)
+        self.orig_image = pg.transform.rotate(self.orig_image, 270)
         self.level = 1
         self.bullet_type = MGBullet
 
@@ -559,13 +569,15 @@ class MashineGun(Tower):
         self.level += 1
         if self.level == 2:
             self.image = images['301']
+            self.orig_image = self.image
         elif self.level == 3:
             self.image = images['302']
+            self.orig_image = self.image
 
 
 class SmallGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('117', pos_x, pos_y, 200, 200, 1, 30, 15)
+        super().__init__('117', pos_x, pos_y, 200, 300, 2, 30, 15)
         self.level = 1
         self.bullet_type = SmallBullet
 
@@ -575,11 +587,12 @@ class SmallGun(Tower):
             pass
         elif self.level == 3:
             self.image = images['142']
+            self.orig_image = self.image
 
 
 class Rocket(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('118', pos_x, pos_y, 300, 300, 1, 40, 20)
+        super().__init__('118', pos_x, pos_y, 100, 300, 3, 40, 20)
         self.level = 1
         self.bullet_type = SmallRocketBullet
 
@@ -593,7 +606,7 @@ class Rocket(Tower):
 
 class PVO(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('120', pos_x, pos_y, 500, 1000, 1, 120, 80)
+        super().__init__('120', pos_x, pos_y, 500, 500, 1, 120, 80)
         self.level = 1
         self.bullet_type = PVOBullet
 
@@ -603,11 +616,12 @@ class PVO(Tower):
             pass
         if self.level == 3:
             self.image = images['119']
+            self.orig_image = self.image
 
 
 class BigGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('167', pos_x, pos_y, 1000, 1000, 1, 200, 100)
+        super().__init__('167', pos_x, pos_y, 1000, 500, 1, 200, 100)
         self.level = 1
         self.bullet_type = BigBullet
 
@@ -617,17 +631,21 @@ class BigGun(Tower):
             pass
         if self.level == 3:
             self.image = images['168']
+            self.orig_image = self.image
 
 
 # Bullets
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y, damage, speed):
+    def __init__(self, tile_type, pos_x, pos_y, damage, speed, angle=0):
         super().__init__(bullet_group, all_sprites)
         self.damage = damage
         self.speed = speed
         self.target = None
         self.image = images[tile_type]
+        self.orig_image = self.image
+        self.image = pg.transform.rotate(self.image, angle)
+        self.orig_image = pg.transform.rotate(self.orig_image, angle)
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.mask = pg.mask.from_surface(self.image)
         self.pos = pos_x, pos_y
@@ -645,10 +663,17 @@ class Bullet(pg.sprite.Sprite):
     def get_center(self):
         return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
 
+    def turn(self):
+        x, y = self.target.get_center()
+        rel_x, rel_y = x - self.rect.x, y - self.rect.y
+        angle = 270 + (180 / math.pi) * -math.atan2(rel_y, rel_x)
+        self.image = pg.transform.rotate(self.orig_image, int(angle) % 360)
+        self.rect = self.image.get_rect(center=self.pos)
+
     def move(self):
         if self.target is None:
             return
-
+        self.turn()
         # move based on center points
         dest = self.target.get_center()
         curr = self.get_center()
@@ -680,11 +705,12 @@ class Bullet(pg.sprite.Sprite):
             self.target.get_damage(self.get_damage())
             if self.target.is_dead():
                 self.kill()
+            self.kill()
 
 
 class MGBullet(Bullet):
     def __init__(self, pos_x, pos_y, damage, speed):
-        super().__init__('303', pos_x, pos_y, damage, speed)
+        super().__init__('303', pos_x, pos_y, damage, speed, 90)
 
 
 class SmallBullet(Bullet):
@@ -883,13 +909,13 @@ def generate_money():
         Money(int(i), x, y)
 
 
-def generate_prices(screen):
+def generate_prices(screen, cost='', sell=''):
     """Makes prices for towers"""
     font = pg.font.Font(None, 30)
     # upgrade
-    screen.blit(font.render('$10', 1, (0, 0, 0)), (512, 700))
+    screen.blit(font.render(f'${cost}', 1, (0, 0, 0)), (512, 700))
     # sell
-    screen.blit(font.render('$10', 1, (0, 0, 0)), (672, 700))
+    screen.blit(font.render(f'${sell}', 1, (0, 0, 0)), (672, 700))
     # towers
     screen.blit(font.render('$10', 1, (0, 0, 0)), (784, 700))
     screen.blit(font.render('$30', 1, (0, 0, 0)), (880, 700))
@@ -911,37 +937,25 @@ def generate_wave():
         for mob in cur_wave:
             for k in range(mob[0]):
                 if mob[1] == 'ball':
-                    Ball(mob[2], way[0][0], way[0][1], way[0][2])
-                    if mob[2] == 1:
-                        sleep(1)
-                    elif mob[2] == 2:
-                        sleep(0.5)
-                    elif mob[2] == 3:
-                        sleep(0.3)
+                    if way[0][0] == way[1][0]:
+                        Ball(mob[2], way[0][0], way[0][1] - k / 2, way[0][2])
                     else:
-                        sleep(0.1)
+                        Ball(mob[2], way[0][0] - k / 2, way[0][1], way[0][2])
                 elif mob[1] == 'frog':
-                    Frog(mob[2], way[0][0], way[0][1], way[0][2])
-                    if mob[2] == 1:
-                        sleep(2)
-                    elif mob[2] == 2:
-                        sleep(1)
-                    elif mob[2] == 3:
-                        sleep(0.5)
+                    if way[0][0] == way[1][0]:
+                        Frog(mob[2], way[0][0], way[0][1] - k, way[0][2])
                     else:
-                        sleep(0.2)
+                        Frog(mob[2], way[0][0] - k, way[0][1], way[0][2])
                 elif mob[1] == 'tank':
-                    Tank(mob[2], way[0][0], way[0][1], way[0][2])
-                    if mob[2] == 1:
-                        sleep(4)
-                    elif mob[2] == 2:
-                        sleep(2)
+                    if way[0][0] == way[1][0]:
+                        Tank(mob[2], way[0][0], way[0][1] - k, way[0][2])
+                    else:
+                        Tank(mob[2], way[0][0] - k, way[0][1], way[0][2])
                 elif mob[1] == 'plain':
-                    Plain(mob[2])
-                    if mob[2] == 1:
-                        sleep(1)
-                    elif mob[2] == 2:
-                        sleep(0.5)
+                    if way[0][0] == way[1][0]:
+                        Plain(mob[2], way[0][0] - k)
+                    else:
+                        Plain(mob[2], way[0][0] - k)
     else:
         game_over()
 
@@ -1064,14 +1078,14 @@ def main():
                         # upgrade
                         for up in upgrade_group:
                             if up.rect.collidepoint(x1, y1):
-                                if chosen_tower:
+                                if chosen_tower and chosen_tower_base:
                                     chosen_tower.upgrade()
                                     chosen_tower_base.upgrade()
                                     break
                         # sell
                         for se in sell_group:
                             if se.rect.collidepoint(x1, y1):
-                                if chosen_tower:
+                                if chosen_tower and chosen_tower_base:
                                     chosen_tower.kill()
                                     chosen_tower_base.kill()
                                     break
@@ -1111,22 +1125,26 @@ def main():
             tower_place_group.draw(screen)
         pg.draw.rect(screen, pg.Color('#66cdaa'), (512, 640, 704, 96)), 768, 640
         # text on the screen
-        generate_prices(screen)
+        if chosen_tower:
+            generate_prices(screen, chosen_tower.cost, chosen_tower.sell)
+        else:
+            generate_prices(screen)
         generate_lifes(screen)
         show_waves(screen)
 
         tower_menu_group.draw(screen)
         tower_base_group.draw(screen)
+        bullet_group.draw(screen)
         towers_group.draw(screen)
         money_group.draw(screen)
         upgrade_group.draw(screen)
         sell_group.draw(screen)
         mobs_group.draw(screen)
-        bullet_group.draw(screen)
         dead_group.draw(screen)
         mobs_group.update()
         towers_group.update(screen)
         bullet_group.update()
+        healbars_group.draw(screen)
         pg.display.flip()
 
         if len(mobs_group) == 0:
