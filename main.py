@@ -180,6 +180,7 @@ upgrade_group = pg.sprite.Group()
 sell_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 dead_group = pg.sprite.Group()
+end_group = pg.sprite.Group()
 
 # constant
 MONEY = 0
@@ -189,11 +190,15 @@ CURRENT_WAVE = 0
 WAVES = 1
 FPS = 30
 MOD = 1
+REPLAY = 1
+INCREASE = 1.0
+TOTAL_INCREASE = 1
 
 WIDTH, HEIGHT = 20, 13
 images = {}
 way = []
 waves = []
+waves_res = []
 tile_size = 64
 chosen_tower, chosen_tower_base = None, None
 
@@ -217,7 +222,7 @@ class Decor(pg.sprite.Sprite):
 
 class Money(pg.sprite.Sprite):
     def __init__(self, money, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
+        super().__init__(money_group, all_sprites)
         tile_type = '197'
         if money == 0:
             tile_type = '197'
@@ -230,15 +235,15 @@ class Money(pg.sprite.Sprite):
         elif money == 4:
             tile_type = '201'
         elif money == 5:
-            tile_type = '202'
-        elif money == 6:
             tile_type = '203'
-        elif money == 7:
+        elif money == 6:
             tile_type = '204'
-        elif money == 8:
+        elif money == 7:
             tile_type = '205'
-        elif money == 9:
+        elif money == 8:
             tile_type = '206'
+        elif money == 9:
+            tile_type = '207'
 
         self.image = images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
@@ -287,10 +292,9 @@ class Mob(pg.sprite.Sprite):
         self.orig_image = self.image
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
         self.image = pg.transform.rotate(self.orig_image, way[0][2])
-        self.health = self.max_health = health
-
+        self.health = self.max_health = health * TOTAL_INCREASE
+        self.money = 10
         self.speed = speed
-
         # controle points
         self.dest = deepcopy([i[:2] for i in way])
         for i in range(len(self.dest)):
@@ -325,12 +329,15 @@ class Mob(pg.sprite.Sprite):
         return self.pos[0] + tile_size // 2, self.pos[1] + tile_size // 2
 
     def dead(self):
+        global MONEY
         self.image = images['114']
         self.speed = 0
         self.health = -100
         self.kill()
         dead_group.add(self)
         self.dead_time = time()
+        MONEY += self.money
+        generate_money()
 
     def is_dead(self):
         return self.health <= 0
@@ -410,6 +417,7 @@ class Ball(Mob):
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
         self.add(ground_mobs)
+        self.money = 5 * level ** 2
 
 
 class Frog(Mob):
@@ -437,6 +445,7 @@ class Frog(Mob):
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, angle)
         self.add(ground_mobs)
+        self.money = 20 * level
 
 
 class Tank(Mob):
@@ -456,6 +465,7 @@ class Tank(Mob):
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.image = pg.transform.rotate(self.image, way[0][2])
         self.add(ground_mobs)
+        self.money = 100 * level
 
 
 class Plain(Mob):
@@ -474,6 +484,7 @@ class Plain(Mob):
         health *= MOD
         super().__init__(tile_type, pos_x, pos_y, health, speed)
         self.add(air_mobs)
+        self.money = 100 * level
 
     def move(self):
         global LIFES
@@ -540,7 +551,7 @@ class Tower(pg.sprite.Sprite):
         return self.cost
 
     def get_range(self):
-        return self.range[self.level]
+        return self.range
 
     def is_active(self):
         return self.active
@@ -589,8 +600,8 @@ class Tower(pg.sprite.Sprite):
         rel_x, rel_y = x - self.rect.x, y - self.rect.y
         angle = 270 + (180 / math.pi) * -math.atan2(rel_y, rel_x)
         self.angle = int(angle)
-        print(angle)
-        print(self.pos[0] + 32 * math.cos(self.angle), self.pos[1] + 32 * math.sin(self.angle))
+        # print(angle)
+        # print(self.pos[0] + 32 * math.cos(self.angle), self.pos[1] + 32 * math.sin(self.angle))
         self.image = pg.transform.rotate(self.orig_image, int(angle) % 360)
         self.rect = self.image.get_rect(center=self.get_center())
 
@@ -979,7 +990,7 @@ class Sell(pg.sprite.Sprite):
 
 def load_level(fname):
     """Loads level from file"""
-    global MONEY, LIFES, WIDTH, HEIGHT, way, waves, WAVES, MOD
+    global MONEY, LIFES, WIDTH, HEIGHT, way, waves, WAVES, MOD, REPLAY, INCREASE, waves_res
     fname = "data/Maps/" + fname
     with open(fname, 'r') as mapf:
         level_map = []
@@ -1014,7 +1025,13 @@ def load_level(fname):
                     sp = [int(wave1[j]), wave1[j - 1], int(wave1[j - 2])]
                     wave2.append(sp)
                 waves.append(wave2)
+            else:
+                s = line.split()
+                REPLAY = int(s[0])
+                INCREASE = float(s[1])
+                WAVES = WAVES + WAVES * REPLAY
         print(waves)
+        waves_res = deepcopy(waves)
     return level_map, decor_map
 
 
@@ -1127,8 +1144,15 @@ def generate_prices(screen, cost='', sell=''):
 
 def generate_wave():
     """Makes waves of enemies"""
-    global waves, dead_group
+    global waves, dead_group, REPLAY, TOTAL_INCREASE
     dead_group = pg.sprite.Group()
+    if not waves:
+        if REPLAY > 0:
+            REPLAY -= 1
+            waves = deepcopy(waves_res)
+            TOTAL_INCREASE *= INCREASE
+        else:
+            game_over()
     if waves:
         for i in mobs_group:
             i.kill()
@@ -1155,8 +1179,6 @@ def generate_wave():
                 elif mob[1] == 'plain':
                     rng = [-2, -1, 0, 1, 2]
                     Plain(mob[2], way[0][0] - 1.5 * k, HEIGHT // 2 + choice(rng))
-    else:
-        game_over()
 
 
 def generate_lifes(screen):
@@ -1182,11 +1204,31 @@ def game_over():
         pass
     else:
         pass
+    gameover = pg.sprite.Sprite()
+    gameover.image = load_image('gameover.png')
+    gameover.rect = gameover.image.get_rect()
+    end_group.add(gameover)
+    gameover.rect.x = 390
+    gameover.rect.y = 200
+    flag = True
+    while flag:
+        end_group.draw(screen)
+        pg.display.flip()
+        for ev in pg.event.get():
+            if pg.key.get_pressed()[pg.K_ESCAPE]:
+                flag = False
+                break
+            if ev.type == pg.MOUSEBUTTONDOWN:
+                flag = False
+                break
+    pg.quit()
+    exit()
+    # menu()
 
 
 def main():
     """Main game function"""
-    global chosen_tower, chosen_tower_base, CURRENT_WAVE, screen, dead_group
+    global chosen_tower, chosen_tower_base, CURRENT_WAVE, screen, dead_group, MONEY
     size = (pg.display.Info().current_w, pg.display.Info().current_h)
     fullscreen = False
     screen.fill(pg.Color('black'))
@@ -1261,17 +1303,27 @@ def main():
                                     for t in tower_place_group:
                                         if t.rect.collidepoint(x1, y1):
                                             x2, y2 = get_cell(event.pos)
-                                            TowerBase('92', x2, y2)
-                                            if tower_type == 1:
+                                            if tower_type == 1 and MONEY >= 10:
+                                                MONEY -= 10
+                                                TowerBase('92', x2, y2)
                                                 MashineGun(x2, y2)
-                                            elif tower_type == 2:
+                                            elif tower_type == 2 and MONEY >= 30:
+                                                MONEY -= 30
+                                                TowerBase('92', x2, y2)
                                                 SmallGun(x2, y2)
-                                            elif tower_type == 3:
+                                            elif tower_type == 3 and MONEY >= 50:
+                                                MONEY -= 50
+                                                TowerBase('92', x2, y2)
                                                 Rocket(x2, y2)
-                                            elif tower_type == 4:
+                                            elif tower_type == 4 and MONEY >= 150:
+                                                MONEY -= 150
+                                                TowerBase('92', x2, y2)
                                                 PVO(x2, y2)
-                                            elif tower_type == 5:
+                                            elif tower_type == 5 and MONEY >= 200:
+                                                MONEY -= 200
+                                                TowerBase('92', x2, y2)
                                                 BigGun(x2, y2)
+                                            generate_money()
                                             break
                                 tower_menu_clicked = False
 
@@ -1280,13 +1332,18 @@ def main():
                         for up in upgrade_group:
                             if up.rect.collidepoint(x1, y1):
                                 if chosen_tower and chosen_tower_base:
-                                    chosen_tower.upgrade()
-                                    chosen_tower_base.upgrade()
+                                    if MONEY >= chosen_tower.cost and chosen_tower.level <= 2:
+                                        MONEY -= chosen_tower.cost
+                                        generate_money()
+                                        chosen_tower.upgrade()
+                                        chosen_tower_base.upgrade()
                                     break
                         # sell
                         for se in sell_group:
                             if se.rect.collidepoint(x1, y1):
                                 if chosen_tower and chosen_tower_base:
+                                    MONEY += chosen_tower.sell
+                                    generate_money()
                                     chosen_tower.kill()
                                     chosen_tower_base.kill()
                                     break
