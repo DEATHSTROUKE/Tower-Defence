@@ -654,6 +654,8 @@ class MashineGun(Tower):
         self.bullet_speed = 2000
 
     def upgrade(self):
+        if self.level == 3:
+            return
         self.level += 1
         if self.level == 2:
             self.image = images['301']
@@ -683,6 +685,8 @@ class SmallGun(Tower):
         self.mob_group = ground_mobs
 
     def upgrade(self):
+        if self.level == 3:
+            return
         self.level += 1
         if self.level == 2:
             self.bullet_damage *= 2
@@ -705,7 +709,15 @@ class Rocket(Tower):
         self.stage = 0
         self.mob_group = ground_mobs
 
+    def half_can_attack(self):
+        return time() - self.last_attack >= 1.0 / self.speed / 2
+
+    def double_can_attack(self):
+        return time() - self.last_attack >= 1.0 / self.speed * 2
+
     def upgrade(self):
+        if self.level == 3:
+            return
         self.level += 1
         if self.level == 2:
             self.bullet_damage *= 2
@@ -720,11 +732,14 @@ class Rocket(Tower):
             self.turn()
         if self.active:
             self.draw_range()
-        if self.stage == 2 or self.stage == 0:
-            self.image = images[self.tile]
-            self.orig_image = images[self.tile]
-            self.image = pg.transform.rotate(self.orig_image, self.angle)
-            self.stage = 0
+
+        if self.half_can_attack():
+            if self.stage == 2 or self.double_can_attack():
+                self.image = images[self.tile]
+                self.orig_image = images[self.tile]
+                self.image = pg.transform.rotate(self.orig_image, self.angle)
+                self.stage = 0
+
         if self.can_attack():
             if self.target is not None and self.target.alive and self.in_range(self.target.get_center()):
                 self.attack(self.target)
@@ -760,6 +775,8 @@ class PVO(Tower):
         self.mob_group = air_mobs
 
     def upgrade(self):
+        if self.level == 3:
+            return
         self.level += 1
         if self.level == 2:
             self.bullet_damage *= 2
@@ -774,6 +791,12 @@ class PVO(Tower):
             self.image = pg.transform.rotate(self.orig_image, self.angle)
             self.rect = self.image.get_rect(center=self.get_center())
 
+    def half_can_attack(self):
+        return time() - self.last_attack >= 1.0 / self.speed / 2
+
+    def double_can_attack(self):
+        return time() - self.last_attack >= 1.0 / self.speed * 2
+
     def update(self, screen):
         if self.target and self.target.is_dead():
             self.target = None
@@ -782,16 +805,17 @@ class PVO(Tower):
         if self.active:
             self.draw_range()
 
-        if (self.stage == 2 or self.stage == 0) and self.level == 3:
-            self.image = images[self.tile]
-            self.orig_image = images[self.tile]
-            self.image = pg.transform.rotate(self.orig_image, self.angle)
-            self.stage = 0
-        elif self.stage == 1 and self.level != 3:
-            self.image = images['120']
-            self.orig_image = images['120']
-            self.image = pg.transform.rotate(self.orig_image, self.angle)
-            self.stage = 0
+        if self.half_can_attack():
+            if (self.level == 1 or self.level == 2) and self.stage == 1:
+                self.image = images[self.tile]
+                self.orig_image = images[self.tile]
+                self.image = pg.transform.rotate(self.orig_image, self.angle)
+                self.stage = 0
+            elif (self.level == 3 and self.stage == 2) or self.double_can_attack():
+                self.image = images[self.tile]
+                self.orig_image = images[self.tile]
+                self.image = pg.transform.rotate(self.orig_image, self.angle)
+                self.stage = 0
 
         if self.can_attack():
             if self.target and self.target.alive and self.in_range(self.target.get_center()):
@@ -833,6 +857,8 @@ class BigGun(Tower):
         self.mob_group = ground_mobs
 
     def upgrade(self):
+        if self.level == 3:
+            return
         self.level += 1
         if self.level == 2:
             self.bullet_damage *= 2
@@ -1255,7 +1281,7 @@ def main():
 
     # test
     TowerBase('92', 4, 5)
-    Rocket(4, 5)
+    PVO(4, 5)
 
     running = True
     while running:
@@ -1411,9 +1437,6 @@ def main():
         towers_group.update(screen)
         bullet_group.update()
         pg.display.flip()
-        for i in mobs_group:
-            print(len(mobs_group))
-            print(i.alive)
         if len(mobs_group) == 0:
             # start wave
             CURRENT_WAVE += 1
