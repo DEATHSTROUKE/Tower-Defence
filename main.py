@@ -1215,6 +1215,11 @@ def load_level(fname):
         if mode == 'endless':
             WAVES = '**'
             REPLAY = 10000000
+            title = LEVEL.replace('.txt', '')[:-1]
+            cur.execute('''UPDATE levels
+                        SET normal = 1
+                        WHERE title = ?''', (title,))
+            con.commit()
         elif mode == 'hardcore':
             LIFES = 1
     return level_map, decor_map
@@ -1395,11 +1400,6 @@ def game_over():
             cur.execute('''UPDATE levels
             SET normal = 1
             WHERE title = ?''', (title,))
-            con.commit()
-        elif mode == 'endless':
-            cur.execute('''UPDATE levels
-                        SET normal = 1
-                        WHERE title = ?''', (title,))
             con.commit()
         elif mode == 'hardcore':
             cur.execute('''UPDATE levels
