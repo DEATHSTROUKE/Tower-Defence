@@ -8,12 +8,16 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPalette, QImage, QBrush, QPixmap, QIcon
 import pygame as pg
 import os
+import sqlite3
 from time import time
 from random import choice
 import math
 
-
 # Menu
+mode = ''
+con = sqlite3.connect('levels_state.db')
+cur = con.cursor()
+
 
 class Menu(QMainWindow):
     def __init__(self):
@@ -84,9 +88,27 @@ class Levels(QWidget):
         uic.loadUi('levels.ui', self)
         self.main = main
         self.home1.clicked.connect(self.home)
-        for i in range(1, 6):
+        # load levels from bd
+        res = list(cur.execute('''SELECT * FROM levels'''))
+        files = os.listdir('data/Maps')
+        names = [i[1] for i in res]
+        for i in files:
+            str1 = i.replace('.txt', '')
+            if str1[:-1] not in names:
+                cur.execute('''INSERT INTO levels(title, difficulty) VALUES(?, ?)''',
+                            (str1[:-1], int(str1[-1])))
+                con.commit()
+        names = [i.replace('.txt', '')[:-1] for i in files]
+        for i in res:
+            if i[1] not in names:
+                cur.execute('''DELETE FROM levels
+                    WHERE title = ?''',
+                            (i[1],))
+                con.commit()
+        res = list(cur.execute('''SELECT * FROM levels'''))
+        for i in res:
             item = QListWidgetItem(self.lw)
-            lvl = Level(self.main, f'{i} level', str(1), i)
+            lvl = Level(self.main, i[1], i[2], i[3], i[4], i[5])
             self.lw.addItem(item)
             self.lw.setItemWidget(item, lvl)
             item.setSizeHint(lvl.size())
@@ -96,19 +118,40 @@ class Levels(QWidget):
 
 
 class Level(QWidget):
-    def __init__(self, main, title, diff, number):
+    def __init__(self, main, title, diff, normal, endless, hardcore):
         super().__init__()
         uic.loadUi('lvl.ui', self)
         self.main = main
-        self.number = number
-        # self.title.setText(title)
-        self.diff.setText(self.diff.text() + diff)
-        self.start.clicked.connect(self.start_game)
+        self.name = f'{title}{diff}.txt'
+        self.dif = diff
+        self.title.setPixmap(QPixmap(f'data/{title}.png'))
+        if diff == 1:
+            self.diff.setPixmap(QPixmap('data/easy.png'))
+        elif diff == 2:
+            self.diff.setPixmap(QPixmap('data/medium.png'))
+        elif diff == 3:
+            self.diff.setPixmap(QPixmap('data/onelife.png'))
+        if normal == 1:
+            self.first.setPixmap(QPixmap('data/star.png'))
+        if endless == 1:
+            self.second.setPixmap(QPixmap('data/star.png'))
+        if hardcore == 1:
+            self.third.setPixmap(QPixmap('data/star.png'))
 
-    def start_game(self):
-        print(f'Game have been started. Level {self.number}')
+        self.normal.clicked.connect(lambda: self.start_game('n'))
+        self.endless.clicked.connect(lambda: self.start_game('e'))
+        self.hardcore.clicked.connect(lambda: self.start_game('h'))
+
+    def start_game(self, mod):
+        global mode
+        if mod == 'n':
+            mode = 'normal'
+        elif mod == 'e':
+            mode = 'endless'
+        elif mod == 'h':
+            mode = 'hardcore'
         self.main.hide()
-        start_level(self.number)
+        start_level(self.name)
 
 
 class Help(QWidget):
@@ -145,7 +188,7 @@ class Settings(QWidget):
 
 # Pygame
 pg.init()
-screen = pg.display.set_mode((1280, 720))
+screen = None
 clock = pg.time.Clock()
 
 
@@ -626,7 +669,7 @@ class Tower(pg.sprite.Sprite):
         x, y = self.target.get_center()
         rel_x, rel_y = x - self.rect.x, y - self.rect.y
         angle = 270 + (180 / math.pi) * -math.atan2(rel_y, rel_x)
-        self.angle = int(angle)
+        self.angle = angle
         # print(angle)
         # print(self.pos[0] + 32 * math.cos(self.angle), self.pos[1] + 32 * math.sin(self.angle))
         self.image = pg.transform.rotate(self.orig_image, int(angle) % 360)
@@ -671,11 +714,12 @@ class TowerBase(pg.sprite.Sprite):
 
 class MashineGun(Tower):
     def __init__(self, pos_x, pos_y):
-        super().__init__('311', pos_x, pos_y, 25, 200, 30, 8, 6)
+        super().__init__('300', pos_x, pos_y, 25, 200, 30, 8, 6)
         self.level = 1
         self.bullet_type = MGBullet
         self.bullet_im = '303'
-        self.bullet_speed = 5000
+        self.bullet_speed = 3000
+        self.img = [self.image, images['314'], self.image]
 
     def upgrade(self):
         if self.level == 3:
@@ -690,6 +734,7 @@ class MashineGun(Tower):
             self.bullet_damage *= 2
             self.image = pg.transform.rotate(self.orig_image, self.angle)
             self.rect = self.image.get_rect(center=self.get_center())
+            self.img = [self.image, images['315'], self.image]
 
         elif self.level == 3:
             self.image = images['302']
@@ -697,9 +742,43 @@ class MashineGun(Tower):
             self.rect.x = self.pos[0]
             self.rect.y = self.pos[1]
             self.bullet_damage *= 2
+            self.bullet_speed *= 2
             self.image = pg.transform.rotate(self.orig_image, self.angle)
             self.rect = self.image.get_rect(center=self.get_center())
             self.bullet_im = '303'
+            self.img = [self.image, images['316'], self.image]
+
+    def update(self, screen):
+        # self.bullets.draw(screen)
+        if self.target and (self.target.is_dead() or not self.in_range(self.target.get_center())):
+            self.target = None
+            self.image = self.img[0]
+            self.orig_image = self.img[0]
+            self.image = pg.transform.rotate(self.orig_image, self.angle)
+        if self.target:
+            self.turn()
+            self.image = self.img[1]
+            self.orig_image = self.img[1]
+            self.image = pg.transform.rotate(self.orig_image, self.angle)
+
+        if self.active:
+            self.draw_range()
+
+        if self.can_attack():
+            if self.target is not None and self.target.alive and self.in_range(self.target.get_center()):
+                self.attack(self.target)
+                self.image = self.img[2]
+                self.orig_image = self.img[2]
+                self.image = pg.transform.rotate(self.orig_image, self.angle)
+                t = time()
+                self.dt = t - self.last_angle
+                self.last_angle = t
+            else:
+                min_s = 99999
+                for mob in self.mob_group:
+                    if self.in_range(mob.get_center()) and self.dist(mob.get_center()) < min_s:
+                        self.target = mob
+                        min_s = self.dist(mob.get_center())
 
 
 class SmallGun(Tower):
@@ -835,7 +914,7 @@ class PVO(Tower):
             self.draw_range()
 
         if self.half_can_attack():
-            if self.level == 1 or self.level == 2 and self.stage == 1:
+            if (self.level == 1 or self.level == 2) and self.stage == 1:
                 self.image = images[self.tile]
                 self.orig_image = images[self.tile]
                 self.image = pg.transform.rotate(self.orig_image, self.angle)
@@ -864,7 +943,6 @@ class PVO(Tower):
                     self.image = images['145']
                     self.orig_image = images['145']
                     self.image = pg.transform.rotate(self.orig_image, self.angle)
-                    self.stage = 0
 
                 t = time()
                 self.dt = t - self.last_angle
@@ -1134,6 +1212,11 @@ def load_level(fname):
                 WAVES = WAVES + WAVES * REPLAY
         print(waves)
         waves_res = deepcopy(waves)
+        if mode == 'endless':
+            WAVES = '**'
+            REPLAY = 10000000
+        elif mode == 'hardcore':
+            LIFES = 1
     return level_map, decor_map
 
 
@@ -1295,20 +1378,36 @@ def show_waves(screen):
     screen.blit(font.render(f'{CURRENT_WAVE}/{WAVES}', 1, (255, 255, 255)), (448, 16))
 
 
-def start_level(level):
-    global LEVEL, all_sprites
+def start_level(title):
+    global LEVEL, all_sprites, screen
+    screen = pg.display.set_mode((1280, 720))
     all_sprites = pg.sprite.Group()
-    LEVEL = level
+    LEVEL = title
     main()
 
 
 def game_over():
-    if LIFES > 0:
-        pass
-    else:
-        pass
     gameover = pg.sprite.Sprite()
-    gameover.image = load_image('gameover.png')
+    if LIFES > 0:
+        gameover.image = load_image('win.png')
+        title = LEVEL.replace('.txt', '')[:-1]
+        if mode == 'normal':
+            cur.execute('''UPDATE levels
+            SET normal = 1
+            WHERE title = ?''', (title,))
+            con.commit()
+        elif mode == 'endless':
+            cur.execute('''UPDATE levels
+                        SET normal = 1
+                        WHERE title = ?''', (title,))
+            con.commit()
+        elif mode == 'hardcore':
+            cur.execute('''UPDATE levels
+                        SET normal = 1
+                        WHERE title = ?''', (title,))
+            con.commit()
+    else:
+        gameover.image = load_image('lose.png')
     gameover.rect = gameover.image.get_rect()
     end_group.add(gameover)
     gameover.rect.x = 390
@@ -1325,8 +1424,7 @@ def game_over():
                 flag = False
                 break
     pg.quit()
-    exit()
-    # menu()
+    menu()
 
 
 def main():
@@ -1339,7 +1437,7 @@ def main():
     # make dict of tiles and other objects
     generate_tiles()
     # generate objects and groups on the main screen
-    level, decor_map = load_level('map1.txt')
+    level, decor_map = load_level(LEVEL)
     generate_level(level)
     generate_decor(decor_map)
     other_obj()
@@ -1353,8 +1451,17 @@ def main():
     tower_type = 0
 
     # test
-    TowerBase('92', 4, 5)
-    Rocket(4, 5)
+    # for i in range(14):
+    #     for j in range(20):
+    #         try:
+    #             if decor_map[i][j] == '80':
+    #                 TowerBase('90', j, i)
+    #                 BigGun(j, i)
+    #         except BaseException:
+    #             pass
+    # for i in towers_group:
+    #     i.upgrade()
+    #     i.upgrade()
 
     last_wave = None
     running = True
@@ -1366,8 +1473,17 @@ def main():
 
             if pg.key.get_pressed()[pg.K_ESCAPE]:
                 '''Pause'''
-                pg.quit()
-                sys.exit()
+                flag = True
+                while flag:
+                    pause_group.draw(screen)
+                    pg.display.flip()
+                    for ev in pg.event.get():
+                        if pg.key.get_pressed()[pg.K_ESCAPE]:
+                            flag = False
+                            break
+                        if ev.type == pg.MOUSEBUTTONDOWN:
+                            flag = False
+                            break
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -1528,17 +1644,17 @@ def main():
             game_over()
 
     pg.quit()
-    # menu()
+    menu()
 
 
 def menu():
     """Shows menu"""
-    # win.show()
+    win.show()
 
 
 if __name__ == '__main__':
-    main()
-    # app = QApplication(sys.argv)
-    # win = Menu()
-    # menu()
-    # sys.exit(app.exec_())
+    # main()
+    app = QApplication(sys.argv)
+    win = Menu()
+    menu()
+    sys.exit(app.exec_())
