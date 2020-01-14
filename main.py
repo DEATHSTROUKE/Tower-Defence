@@ -14,6 +14,7 @@ from random import choice
 import math
 
 # Menu
+pg.init()
 mode = ''
 con = sqlite3.connect('levels_state.db')
 cur = con.cursor()
@@ -150,7 +151,7 @@ class Level(QWidget):
             mode = 'endless'
         elif mod == 'h':
             mode = 'hardcore'
-        self.main.hide()
+        # self.main.close()
         start_level(self.name)
 
 
@@ -187,7 +188,6 @@ class Settings(QWidget):
 
 
 # Pygame
-pg.init()
 screen = None
 clock = pg.time.Clock()
 
@@ -749,11 +749,13 @@ class MashineGun(Tower):
             self.img = [self.image, images['316'], self.image]
 
     def update(self, screen):
-        # self.bullets.draw(screen)
         if self.target and (self.target.is_dead() or not self.in_range(self.target.get_center())):
             self.target = None
             self.image = self.img[0]
             self.orig_image = self.img[0]
+            if self.level == 1:
+                self.image = pg.transform.rotate(self.orig_image, int(self.angle) % 360)
+            self.rect = self.image.get_rect(center=self.get_center())
 
         if self.target:
             self.turn()
@@ -769,6 +771,7 @@ class MashineGun(Tower):
             if self.target is not None and self.target.alive and \
                     self.in_range(self.target.get_center()):
                 self.attack(self.target)
+
                 t = time()
                 self.dt = t - self.last_angle
                 self.last_angle = t
@@ -1423,7 +1426,7 @@ def game_over():
                 flag = False
                 break
     pg.quit()
-    menu()
+    # menu()
 
 
 def main():
@@ -1643,17 +1646,16 @@ def main():
             game_over()
 
     pg.quit()
-    menu()
+    # menu()
 
 
 def menu():
     """Shows menu"""
+    app = QApplication(sys.argv)
+    win = Menu()
     win.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    # main()
-    app = QApplication(sys.argv)
-    win = Menu()
     menu()
-    sys.exit(app.exec_())
