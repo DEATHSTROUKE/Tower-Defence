@@ -754,22 +754,21 @@ class MashineGun(Tower):
             self.target = None
             self.image = self.img[0]
             self.orig_image = self.img[0]
-            self.image = pg.transform.rotate(self.orig_image, self.angle)
+
         if self.target:
             self.turn()
             self.image = self.img[1]
             self.orig_image = self.img[1]
-            self.image = pg.transform.rotate(self.orig_image, self.angle)
+            self.image = pg.transform.rotate(self.orig_image, int(self.angle) % 360)
+            self.rect = self.image.get_rect(center=self.get_center())
 
         if self.active:
             self.draw_range()
 
         if self.can_attack():
-            if self.target is not None and self.target.alive and self.in_range(self.target.get_center()):
+            if self.target is not None and self.target.alive and \
+                    self.in_range(self.target.get_center()):
                 self.attack(self.target)
-                self.image = self.img[2]
-                self.orig_image = self.img[2]
-                self.image = pg.transform.rotate(self.orig_image, self.angle)
                 t = time()
                 self.dt = t - self.last_angle
                 self.last_angle = t
