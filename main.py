@@ -1209,13 +1209,17 @@ def show_waves(screen):
     screen.blit(font.render(f'{CURRENT_WAVE}/{WAVES}', 1, (255, 255, 255)), (448, 16))
 
 
-def start_level(title, mode1):
+def start_level(title, mode1, music):
     global LEVEL, all_sprites, screen, mode
     pg.init()
     mode = mode1
     screen = pg.display.set_mode((1280, 720))
     all_sprites = pg.sprite.Group()
     LEVEL = title
+    if music == '1':
+        pg.mixer.music.load('data/music.mp3')
+        pg.mixer.music.play(10)
+        pg.mixer.music.set_volume(0.4)
     main()
 
 
@@ -1476,4 +1480,4 @@ def main():
 
 
 print(sys.argv)
-start_level(sys.argv[1], sys.argv[2])
+start_level(sys.argv[1], sys.argv[2], sys.argv[3])

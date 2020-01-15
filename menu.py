@@ -21,6 +21,7 @@ class Menu(QMainWindow):
         self.setFixedSize(1300, 900)
         self.setWindowIcon(QIcon('data/Tiles/171.png'))
         self.setWindowTitle('Tower Defence')
+        self.music = True
         self.update_bg()
         self.start()
 
@@ -145,7 +146,11 @@ class Level(QWidget):
             mode = 'endless'
         elif mod == 'h':
             mode = 'hardcore'
-        subprocess.Popen(['python.exe', 'main.py', self.name, mode])
+        if self.main.music:
+            mus = '1'
+        else:
+            mus = '0'
+        subprocess.Popen(['python.exe', 'main.py', self.name, mode, mus])
 
 
 class Help(QWidget):
@@ -173,9 +178,11 @@ class Settings(QWidget):
 
     def change(self):
         if self.is_sound:
+            self.main.music = False
             self.is_sound = False
             self.sound.setIcon(QIcon('data/nosound.png'))
         else:
+            self.main.music = True
             self.is_sound = True
             self.sound.setIcon(QIcon('data/sound.png'))
 
