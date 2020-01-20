@@ -1282,19 +1282,6 @@ def main():
     tower_menu_clicked = False
     tower_type = 0
 
-    # test
-    # for i in range(14):
-    #     for j in range(20):
-    #         try:
-    #             if decor_map[i][j] == '80':
-    #                 TowerBase('90', j, i)
-    #                 BigGun(j, i)
-    #         except BaseException:
-    #             pass
-    # for i in towers_group:
-    #     i.upgrade()
-    #     i.upgrade()
-
     last_wave = None
     running = True
     while running:

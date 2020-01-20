@@ -102,9 +102,10 @@ class Levels(QWidget):
                             (i[1],))
                 con.commit()
         res = list(cur.execute('''SELECT * FROM levels'''))
+        print(res)
         for i in res:
             item = QListWidgetItem(self.lw)
-            lvl = Level(self.main, i[1][1:], i[2], i[3], i[4], i[5])
+            lvl = Level(self.main, i[1], i[2], i[3], i[4], i[5])
             self.lw.addItem(item)
             self.lw.setItemWidget(item, lvl)
             item.setSizeHint(lvl.size())
@@ -120,7 +121,7 @@ class Level(QWidget):
         self.main = main
         self.name = f'{title}{diff}.txt'
         self.dif = diff
-        self.title.setPixmap(QPixmap(f'data/{title}.png'))
+        self.title.setPixmap(QPixmap(f'data/{title[1:]}.png'))
         if diff == 1:
             self.diff.setPixmap(QPixmap('data/easy.png'))
         elif diff == 2:
