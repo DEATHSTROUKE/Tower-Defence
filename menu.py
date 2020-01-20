@@ -104,7 +104,7 @@ class Levels(QWidget):
         res = list(cur.execute('''SELECT * FROM levels'''))
         for i in res:
             item = QListWidgetItem(self.lw)
-            lvl = Level(self.main, i[1], i[2], i[3], i[4], i[5])
+            lvl = Level(self.main, i[1][1:], i[2], i[3], i[4], i[5])
             self.lw.addItem(item)
             self.lw.setItemWidget(item, lvl)
             item.setSizeHint(lvl.size())
@@ -126,7 +126,7 @@ class Level(QWidget):
         elif diff == 2:
             self.diff.setPixmap(QPixmap('data/medium.png'))
         elif diff == 3:
-            self.diff.setPixmap(QPixmap('data/onelife.png'))
+            self.diff.setPixmap(QPixmap('data/hard.png'))
         if normal == 1:
             self.first.setPixmap(QPixmap('data/star.png'))
         if endless == 1:
