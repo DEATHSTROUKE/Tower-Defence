@@ -293,23 +293,23 @@ class Ball(Mob):
 class Frog(Mob):
     def __init__(self, level, pos_x, pos_y, angle):
         tile_type = ''
-        health = 200
+        health = 300
         speed = 10
         if level == 1:
             tile_type = '163'
-            health = 200
+            health = 300
             speed = 10
         elif level == 2:
             tile_type = '165'
-            health = 500
+            health = 600
             speed = 20
         elif level == 3:
             tile_type = '166'
-            health = 1000
+            health = 1200
             speed = 50
         elif level == 4:
             tile_type = '164'
-            health = 2000
+            health = 2400
             speed = 100
         health *= MOD
         super().__init__(tile_type, pos_x, pos_y, health, speed)
