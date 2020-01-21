@@ -1218,7 +1218,7 @@ def start_level(title, mode1, music):
     LEVEL = title
     if music == '1':
         pg.mixer.music.load('data/music.mp3')
-        pg.mixer.music.play(10)
+        pg.mixer.music.play(100)
         pg.mixer.music.set_volume(0.4)
     main()
 
